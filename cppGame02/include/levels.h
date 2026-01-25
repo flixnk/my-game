@@ -8,6 +8,7 @@
 class Level {
     public:
         virtual ~Level() {}
+        virtual void initLevel() = 0;
         virtual void draw() = 0;
 
         std::vector<std::vector<Block>>& getMap() { return map; }
@@ -16,6 +17,17 @@ class Level {
         Vector2 levelSize;
         Texture2D backgroundSprite;
         std::vector<std::vector<Block>> map;
+};
+
+class Level1 : public Level {
+    public:
+    Level1();
+    ~Level1();
+    void initLevel() override;
+    void draw() override;
+
+    private:
+    Texture2D stoneBlockSprite;
 };
 
 #endif

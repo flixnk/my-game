@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "player.h"
 #include <cmath>
+#include "levels.h"
 
 int main() {
     Vector2 screenSize = { 200, 150 };
@@ -16,6 +17,8 @@ int main() {
     camera.zoom = 3.0f;
 
     Player player;
+    Level1 level1;
+    level1.initLevel();
 
     while (!WindowShouldClose()) {
         if (IsWindowResized()) {
@@ -36,7 +39,9 @@ int main() {
         BeginDrawing();
             ClearBackground(RAYWHITE);
             BeginMode2D(camera);
+                level1.draw();
                 player.animate();
+                DrawFPS(10, 10);
             EndMode2D();
         EndDrawing();
     }

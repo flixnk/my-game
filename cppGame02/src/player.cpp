@@ -49,6 +49,8 @@ void Player::movement() {
     isMoving = false;
     if (IsKeyDown(KEY_A)) {playerPos.x -= 2; isMoving = true;}
     if (IsKeyDown(KEY_D)) {playerPos.x += 2; isMoving = true;}
+    if (IsKeyDown(KEY_W)) {playerPos.y -= 2; isMoving = true;}
+    if (IsKeyDown(KEY_S)) {playerPos.y += 2; isMoving = true;}
 }
 
 Vector2 Player::getPlayerPos() {

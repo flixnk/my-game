@@ -16,12 +16,14 @@ struct Block {
     bool isSolid;
     bool isDeadly;
     bool isWin;
+    bool isRenderOrigin;
 
-    Block(BlockType id = AIR, bool collision = false, bool death = false, bool win = false) {
+    Block(BlockType id = AIR, bool collision = false, bool death = false, bool win = false, bool render = false) {
         type = id;
         isSolid = collision;
         isDeadly = death;
         isWin = win;
+        isRenderOrigin = render;
     }
 };
 

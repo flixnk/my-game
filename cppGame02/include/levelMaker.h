@@ -3,13 +3,14 @@
 
 #include "block.h"
 #include <raylib.h>
+#include <vector>
 
-class levelMaker {
+class LevelMaker {
     public:
-    levelMaker();
-    ~levelMaker();
+    LevelMaker();
+    ~LevelMaker();
 
-    void addPlatform(int posX, int posY, int width, int height, Block ressource, Texture2D sprite, int blockSize, int drawnBlockSize);
+    void addPlatform(int posX, int posY, int width, int height, Block ressource, std::vector<std::vector<Block>>& levelMap, int spriteSize);
 };
 
 #endif

@@ -1,31 +1,25 @@
 #include "levelMaker.h"
 #include <stdexcept>
-#include <vector>
-#include "levels.h"
 
-levelMaker::levelMaker() {}
 
-levelMaker::~levelMaker() {}
+LevelMaker::LevelMaker() {}
 
-void levelMaker::addPlatform(int posX, int posY, int width, int height, Block ressource, Texture2D sprite, int blockSize, int drawnBlockSize = -1) {
-    std::vector<std::vector<Block>> levelMap = getMap();
+LevelMaker::~LevelMaker() {}
 
-    if (height % blockSize != 0 || width % blockSize != 0) {
-        throw std::runtime_error("Error: width and height have to be mutliples of blockSize in addPlatform.");
-    }
-
-    if (drawnBlockSize == -1) {
-        drawnBlockSize = blockSize;
-    }
-
+void LevelMaker::addPlatform(int posX, int posY, int width, int height, Block ressource, std::vector<std::vector<Block>>& levelMap, int spriteSize) {
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-            levelMap[posX+i][posY+j] = ressource;
+            if (posX+i >= 0 && posY+j >= 0 && posX+i < levelMap.size() && posY+j < levelMap[0].size()) {
+                //Works to not overwrite already existing render origins
+                Block helper;
+                helper.isRenderOrigin = levelMap[posX+i][posY+j].isRenderOrigin;
 
-            if (i % blockSize == 0 && j % blockSize == 0) {
-                Rectangle source = { 0.0f, 0.0f, (float)blockSize, (float)blockSize };
-                Rectangle dest = { (float)posX+i, (float)posY+j, (float)drawnBlockSize, (float)drawnBlockSize };
-                DrawTexturePro(sprite, source, dest, { 0, 0 }, 0.0f, WHITE);
+                levelMap[posX+i][posY+j] = ressource;
+                levelMap[posX+i][posY+j].isRenderOrigin = helper.isRenderOrigin;
+                
+                if (i % spriteSize == 0 && j % spriteSize == 0) {
+                    levelMap[posX+i][posY+j].isRenderOrigin = true;
+                }
             }
         }
     }
