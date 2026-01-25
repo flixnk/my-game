@@ -46,8 +46,7 @@ void Player::animate() {
 
   sourceRec.x = (float)currentFrame * frameWidth;
 
-  Rectangle destRec = {playerPos.x, playerPos.y, frameWidth,
-                       (float)spriteSheet.height};
+  Rectangle destRec = {playerPos.x, playerPos.y, frameWidth, (float)spriteSheet.height};
 
   DrawTexturePro(spriteSheet, sourceRec, destRec, {0, 0}, 0.0f, WHITE);
 

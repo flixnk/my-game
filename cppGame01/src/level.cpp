@@ -4,7 +4,7 @@
 #include "block.h"
 #include <iostream>
 
-Level0::Level0() {
+Level0::Level0() { 
     levelSize = { 20, 10 };
 
     backgroundSprite = LoadTexture("../assets/stone_block.png");
