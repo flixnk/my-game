@@ -16,6 +16,8 @@ class Player {
 
     Vector2 getPlayerPos();
     int getFrameWidth();
+    Vector2 getPos() const { return position; }
+    Vector2 getOldPos() const { return oldPosition; }
 
     private:
     Texture2D spriteSheet;
@@ -32,6 +34,8 @@ class Player {
     bool showDebug;
     bool jumpRequest;
     int moveDirection;
+    Vector2 position;
+    Vector2 oldPosition;
 };
 
 #endif

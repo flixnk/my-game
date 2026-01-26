@@ -60,6 +60,7 @@ void Player::animate() {
 }
 
 void Player::movement(const std::vector<std::vector<Block>>& map) {
+    oldPosition = position;
     int speed = 2;
     isMoving = false;
 
