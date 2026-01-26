@@ -27,9 +27,9 @@ void Level1::initLevel() {
     LevelMaker levelMaker;
 
     levelMaker.addPlatform(0, 0, map.size(), map[0].size(), AIR, map, backgroundSprite.height);
-    levelMaker.addPlatform(0, map[0].size()-32, map.size(), 32, STONE, map, stoneBlockSprite.height);
+    levelMaker.addPlatform(0, map[0].size()-32, map.size(), 32, Block { STONE, true}, map, stoneBlockSprite.height);
 
-    levelMaker.addPlatform(4, map[0].size()-60, 32, 32, STONE, map, stoneBlockSprite.height);
+    //levelMaker.addPlatform(4, map[0].size()-60, 32, 32, Block { STONE, true}, map, stoneBlockSprite.height);
 
 }
 

@@ -1,7 +1,9 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "block.h"
 #include "raylib.h"
+#include <vector>
 
 class Player {
     public:
@@ -9,7 +11,7 @@ class Player {
     ~Player();
 
     void animate();
-    void movement();
+    void movement(const std::vector<std::vector<Block>>& map);
 
     Vector2 getPlayerPos();
     int getFrameWidth();
@@ -23,6 +25,10 @@ class Player {
     float frameSpeed;
     float frameWidth;
     bool isMoving;
+    float velocity;
+    bool isGrounded;
+    int playerSize;
+    bool showDebug;
 };
 
 #endif

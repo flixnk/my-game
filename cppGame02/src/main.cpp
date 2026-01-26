@@ -20,6 +20,12 @@ int main() {
     Level1 level1;
     level1.initLevel();
 
+    const std::vector<std::vector<Block>>& map = level1.getMap();
+
+    const float targetPhysicsFPS = 120.0f; 
+    const float dt = 1.0f / targetPhysicsFPS;
+    float accumulator = 0.0f;
+
     while (!WindowShouldClose()) {
         if (IsWindowResized()) {
             screenSize.x = GetScreenWidth();
@@ -30,14 +36,20 @@ int main() {
             camera.offset.y = floorf(screenSize.y / 2.0f - frameWidth*camera.zoom/2);
         }
 
-        player.movement();
-        Vector2 playerPos = player.getPlayerPos();
+        accumulator += GetFrameTime();
 
-        camera.target.x = playerPos.x;
-        camera.target.y = playerPos.y;
+        while (accumulator >= dt) {
+            player.movement(map);
+            
+            Vector2 playerPos = player.getPlayerPos();
+            camera.target.x = playerPos.x;
+            camera.target.y = playerPos.y;
+
+            accumulator -= dt;
+        }
 
         BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(BLUE);
             BeginMode2D(camera);
                 level1.draw();
                 player.animate();

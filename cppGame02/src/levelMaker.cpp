@@ -1,6 +1,4 @@
 #include "levelMaker.h"
-#include <stdexcept>
-
 
 LevelMaker::LevelMaker() {}
 

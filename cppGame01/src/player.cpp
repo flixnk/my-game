@@ -59,7 +59,7 @@ void Player::animate() {
   }
 }
 
-void Player::movement(const std::vector<std::vector<Block>> &map) {
+void Player::movement(const std::vector<std::vector<Block>>& map) {
   int playerSize = 32;
   isMoving = false;
   float speed = 2.0f;
@@ -119,7 +119,7 @@ void Player::movement(const std::vector<std::vector<Block>> &map) {
 
   if (vertVelocity > 20) {
     vertVelocity = 20;
-}
+  }
 
   if (vertVelocity > 0) {
     //falling logic

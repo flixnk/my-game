@@ -1,4 +1,5 @@
 #include "player.h"
+#include <cstdlib>
 
 Player::Player() {
 
@@ -16,6 +17,10 @@ Player::Player() {
     frameSpeed = 0.2f;
     frameWidth = (float)spriteSheet.width / numFrames;
     isMoving = false;
+    velocity = 0.0f;
+    isGrounded = false;
+    playerSize = spriteSheet.height;
+    showDebug = false;
 }
 
 Player::~Player() { UnloadTexture(spriteSheet); }
@@ -42,15 +47,79 @@ void Player::animate() {
 
     Rectangle destRec = {playerPos.x, playerPos.y, frameWidth, (float)spriteSheet.height};
     DrawTexturePro(spriteSheet, sourceRec, destRec, {0, 0}, 0.0f, WHITE);
+
+    if (IsKeyPressed(KEY_F3)) {
+        showDebug = !showDebug;
+    }
+
+    if (showDebug) {
+        DrawRectangleLinesEx(destRec, 1.0f, GREEN);
+    }
 }
 
-void Player::movement() {
+void Player::movement(const std::vector<std::vector<Block>>& map) {
     int speed = 2;
     isMoving = false;
-    if (IsKeyDown(KEY_A)) {playerPos.x -= 2; isMoving = true;}
+
+    auto isValid = [&](int x, int y) {
+        if (x < 0 || x >= map.size()) return false;
+        if (y < 0 || y >= map[0].size()) return false;
+        return true;
+    };
+
+    if (IsKeyDown(KEY_A)) {
+        isMoving = true;
+
+        playerPos.x -= 2; 
+    }
+
     if (IsKeyDown(KEY_D)) {playerPos.x += 2; isMoving = true;}
     if (IsKeyDown(KEY_W)) {playerPos.y -= 2; isMoving = true;}
     if (IsKeyDown(KEY_S)) {playerPos.y += 2; isMoving = true;}
+
+    if (IsKeyPressed(KEY_SPACE) && isGrounded) {
+        velocity = -6;
+        isGrounded = false;
+    }
+
+    velocity += 0.125f;
+
+    if (velocity > 40) velocity = 40;
+
+    int steps = abs((int)velocity); 
+    int direction = (velocity > 0) ? 1 : -1;
+
+    for (int i = 0; i < steps; i++) {
+        
+        int nextY = playerPos.y + direction;
+        bool hitSolid = false;
+
+        if (direction > 0) {
+             int feetPos = nextY + playerSize - 1;
+             
+             if ((isValid(playerPos.x, feetPos) && map[playerPos.x][feetPos].isSolid) ||
+                 (isValid(playerPos.x + playerSize - 1, feetPos) && map[playerPos.x + playerSize - 1][feetPos].isSolid)) {
+                 hitSolid = true;
+             }
+        } 
+        else {
+             if ((isValid(playerPos.x, nextY) && map[playerPos.x][nextY].isSolid) ||
+                 (isValid(playerPos.x + playerSize - 1, nextY) && map[playerPos.x + playerSize - 1][nextY].isSolid)) {
+                 hitSolid = true;
+             }
+        }
+
+        if (hitSolid) {
+            velocity = 0;
+            if (direction > 0) {
+                isGrounded = true; 
+            }
+            break;
+        } else {
+            playerPos.y = nextY;
+            isGrounded = false;
+        }
+    }
 }
 
 Vector2 Player::getPlayerPos() {
