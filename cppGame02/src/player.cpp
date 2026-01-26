@@ -21,6 +21,8 @@ Player::Player() {
     isGrounded = false;
     playerSize = spriteSheet.height;
     showDebug = false;
+    jumpRequest = false;
+    moveDirection = 0;
 }
 
 Player::~Player() { UnloadTexture(spriteSheet); }
@@ -67,19 +69,15 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
         return true;
     };
 
-    if (IsKeyDown(KEY_A)) {
+    if (moveDirection != 0) {
         isMoving = true;
-
-        playerPos.x -= 2; 
+        playerPos.x += moveDirection * speed;
     }
 
-    if (IsKeyDown(KEY_D)) {playerPos.x += 2; isMoving = true;}
-    if (IsKeyDown(KEY_W)) {playerPos.y -= 2; isMoving = true;}
-    if (IsKeyDown(KEY_S)) {playerPos.y += 2; isMoving = true;}
-
-    if (IsKeyPressed(KEY_SPACE) && isGrounded) {
+    if (jumpRequest && isGrounded) {
         velocity = -6;
         isGrounded = false;
+        jumpRequest = false;
     }
 
     velocity += 0.125f;
@@ -120,6 +118,17 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
             isGrounded = false;
         }
     }
+}
+
+void Player::handleInput() {
+    if (IsKeyPressed(KEY_SPACE)) {
+        jumpRequest = true;
+    }
+
+    moveDirection = 0;
+    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) moveDirection = -1;
+    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) moveDirection = 1;
+    
 }
 
 Vector2 Player::getPlayerPos() {

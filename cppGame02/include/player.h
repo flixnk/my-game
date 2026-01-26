@@ -12,6 +12,7 @@ class Player {
 
     void animate();
     void movement(const std::vector<std::vector<Block>>& map);
+    void handleInput();
 
     Vector2 getPlayerPos();
     int getFrameWidth();
@@ -29,6 +30,8 @@ class Player {
     bool isGrounded;
     int playerSize;
     bool showDebug;
+    bool jumpRequest;
+    int moveDirection;
 };
 
 #endif

@@ -26,6 +26,8 @@ int main() {
     const float dt = 1.0f / targetPhysicsFPS;
     float accumulator = 0.0f;
 
+    float cameraSmoothSpeed = 10.0f;
+
     while (!WindowShouldClose()) {
         if (IsWindowResized()) {
             screenSize.x = GetScreenWidth();
@@ -37,16 +39,18 @@ int main() {
         }
 
         accumulator += GetFrameTime();
+        player.handleInput();
 
         while (accumulator >= dt) {
             player.movement(map);
-            
-            Vector2 playerPos = player.getPlayerPos();
-            camera.target.x = playerPos.x;
-            camera.target.y = playerPos.y;
-
             accumulator -= dt;
         }
+
+        Vector2 playerPos = player.getPlayerPos();
+        float deltaTime = GetFrameTime();
+
+        camera.target.x += (playerPos.x - camera.target.x) * cameraSmoothSpeed * deltaTime;
+        camera.target.y += (playerPos.y - camera.target.y) * cameraSmoothSpeed * deltaTime;
 
         BeginDrawing();
             ClearBackground(BLUE);
