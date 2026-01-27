@@ -15,12 +15,13 @@ class Player {
     void handleInput();
 
     int getFrameWidth() const { return frameWidth; }
-    Vector2 getPos() const { return playerPos; }
+    Vector2 getPos() const { return position; }
     Vector2 getOldPos() const { return oldPosition; }
+    Rectangle getHitbox() const { return { position.x, position.y, playerSize.x, playerSize.y }; }
 
     private:
     Texture2D spriteSheet;
-    Vector2 playerPos;
+    Vector2 position;
     int numFrames;
     int currentFrame;
     float frameTimer;
@@ -29,7 +30,7 @@ class Player {
     bool isMoving;
     float velocity;
     bool isGrounded;
-    int playerSize;
+    Vector2 playerSize;
     bool showDebug;
     bool jumpRequest;
     int moveDirection;

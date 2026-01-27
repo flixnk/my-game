@@ -45,6 +45,7 @@ void Level1::initLevel() {
     levelMaker.addPlatform(0, map[0].size()-32, map.size(), 32, Block { STONE, true}, map, stoneBlockSprite.height);
 
     levelMaker.addPlatform(4, map[0].size()-64, 32, 32, Block { STONE, true}, map, stoneBlockSprite.height);
+    levelMaker.addPlatform(36, map[0].size()-128, 32, 96, Block { STONE, true}, map, stoneBlockSprite.height);
 
     levelMaker.addPlatform(map.size()-32, map[0].size()-64, 32, 32, { FLAG, false, false, true }, map, flagSprite.height);
 }

@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "player.h"
 #include <cmath>
+#include <stdexcept>
 #include "levels.h"
 #include "raymath.h"
 
@@ -41,6 +42,7 @@ int main() {
         while (accumulator >= dt) {
             player.movement(map);
             enemy.movement(map);
+            if (CheckCollisionRecs(player.getHitbox(), enemy.getHitbox())) throw std::runtime_error("Touched an enemy!");
             accumulator -= dt;
         }
 
@@ -48,12 +50,10 @@ int main() {
 
         Vector2 playerPosNow = player.getPos();
         Vector2 playerPosOld = player.getOldPos();
-
         Vector2 renderPos = Vector2Lerp(playerPosOld, playerPosNow, alpha);
 
         Vector2 enemyPosNow = enemy.getPos();
         Vector2 enemyPosOld = enemy.getOldPos();
-
         Vector2 enemyRenderPos = Vector2Lerp(enemyPosOld, enemyPosNow, alpha);
 
         gameCam.update(renderPos, GetFrameTime());

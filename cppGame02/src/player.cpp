@@ -10,8 +10,8 @@ Player::Player() {
         TraceLog(LOG_ERROR, "Failed to load player png");
     }
 
-    playerPos = { 0, 0 };
-    oldPosition = playerPos;
+    position = { 0, 0 };
+    oldPosition = position;
     numFrames = 3;
     currentFrame = 0;
     frameTimer = 0.0f;
@@ -20,7 +20,8 @@ Player::Player() {
     isMoving = false;
     velocity = 0.0f;
     isGrounded = false;
-    playerSize = spriteSheet.height;
+
+    playerSize = {frameWidth, (float)spriteSheet.height};
     showDebug = false;
     jumpRequest = false;
     moveDirection = IDLE;
@@ -61,7 +62,7 @@ void Player::animate(Vector2 renderPos) {
 }
 
 void Player::movement(const std::vector<std::vector<Block>>& map) {
-    oldPosition = playerPos;
+    oldPosition = position;
     int speed = 2;
     isMoving = false;
 
@@ -73,21 +74,21 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
 
     if (moveDirection != IDLE) {
         isMoving = true;
-        int newYHead = playerPos.y;
-        int newYFoot = playerPos.y + playerSize-1;
+        int newYHead = position.y;
+        int newYFoot = position.y + playerSize.y-1;
         int newX;
 
         if (moveDirection == RIGHT) {
-            newX = playerPos.x + moveDirection*speed + playerSize-1;
+            newX = position.x + moveDirection*speed + playerSize.x-1;
         }
         else if (moveDirection == LEFT) {
-            newX = playerPos.x + moveDirection*speed;
+            newX = position.x + moveDirection*speed;
         }
 
         bool isFreeHead = isValid(newX, newYHead) && !map[newX][newYHead].isSolid;
         bool isFreeFoot = isValid(newX, newYFoot) && !map[newX][newYFoot].isSolid;
 
-        if (isFreeHead && isFreeFoot) playerPos.x += moveDirection * speed;
+        if (isFreeHead && isFreeFoot) position.x += moveDirection * speed;
     }
 
     if (jumpRequest) {
@@ -96,7 +97,12 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
         jumpRequest = false;
     }
 
-    velocity += 0.125f;
+    if (velocity > 0) {
+        velocity += 0.25f; //falling
+    } 
+    else {
+        velocity += 0.15f; //going up
+    }
 
     if (velocity > 40) velocity = 40;
 
@@ -105,20 +111,20 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
 
     for (int i = 0; i < steps; i++) {
         
-        int nextY = playerPos.y + direction;
+        int nextY = position.y + direction;
         bool hitSolid = false;
 
         if (direction > 0) {
-             int feetPos = nextY + playerSize - 1;
+             int feetPos = nextY + playerSize.y - 1;
              
-             if ((isValid(playerPos.x, feetPos) && map[playerPos.x][feetPos].isSolid) ||
-                 (isValid(playerPos.x + playerSize - 1, feetPos) && map[playerPos.x + playerSize - 1][feetPos].isSolid)) {
+             if ((isValid(position.x, feetPos) && map[position.x][feetPos].isSolid) ||
+                 (isValid(position.x + playerSize.x - 1, feetPos) && map[position.x + playerSize.x - 1][feetPos].isSolid)) {
                  hitSolid = true;
              }
         } 
         else {
-             if ((isValid(playerPos.x, nextY) && map[playerPos.x][nextY].isSolid) ||
-                 (isValid(playerPos.x + playerSize - 1, nextY) && map[playerPos.x + playerSize - 1][nextY].isSolid)) {
+             if ((isValid(position.x, nextY) && map[position.x][nextY].isSolid) ||
+                 (isValid(position.x + playerSize.x - 1, nextY) && map[position.x + playerSize.x - 1][nextY].isSolid)) {
                  hitSolid = true;
              }
         }
@@ -130,7 +136,7 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
             }
             break;
         } else {
-            playerPos.y = nextY;
+            position.y = nextY;
             isGrounded = false;
         }
     }
