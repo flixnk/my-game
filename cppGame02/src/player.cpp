@@ -1,8 +1,8 @@
 #include "player.h"
 #include <cstdlib>
+#include "enemy.h"
 
 Player::Player() {
-
     spriteSheet = LoadTexture("../assets/player_sheet_02.png");
     SetTextureFilter(spriteSheet, TEXTURE_FILTER_POINT);
 
@@ -11,6 +11,7 @@ Player::Player() {
     }
 
     playerPos = { 0, 0 };
+    oldPosition = playerPos;
     numFrames = 3;
     currentFrame = 0;
     frameTimer = 0.0f;
@@ -22,12 +23,12 @@ Player::Player() {
     playerSize = spriteSheet.height;
     showDebug = false;
     jumpRequest = false;
-    moveDirection = 0;
+    moveDirection = IDLE;
 }
 
 Player::~Player() { UnloadTexture(spriteSheet); }
 
-void Player::animate() {
+void Player::animate(Vector2 renderPos) {
     if (isMoving) {
         if (currentFrame == 0)
             currentFrame = 1;
@@ -44,23 +45,23 @@ void Player::animate() {
         currentFrame = 0;
     }
 
-    Rectangle sourceRec = {0.0f, 0.0f, frameWidth, (float)spriteSheet.height};
-    sourceRec.x = (float)currentFrame * frameWidth;
+    Rectangle source = {0.0f, 0.0f, frameWidth, (float)spriteSheet.height};
+    source.x = (float)currentFrame * frameWidth;
 
-    Rectangle destRec = {playerPos.x, playerPos.y, frameWidth, (float)spriteSheet.height};
-    DrawTexturePro(spriteSheet, sourceRec, destRec, {0, 0}, 0.0f, WHITE);
+    Rectangle dest = {renderPos.x, renderPos.y, frameWidth, (float)spriteSheet.height};
+    DrawTexturePro(spriteSheet, source, dest, {0, 0}, 0.0f, WHITE);
 
     if (IsKeyPressed(KEY_F3)) {
         showDebug = !showDebug;
     }
 
     if (showDebug) {
-        DrawRectangleLinesEx(destRec, 1.0f, GREEN);
+        DrawRectangleLinesEx(dest, 1.0f, GREEN);
     }
 }
 
 void Player::movement(const std::vector<std::vector<Block>>& map) {
-    oldPosition = position;
+    oldPosition = playerPos;
     int speed = 2;
     isMoving = false;
 
@@ -70,12 +71,26 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
         return true;
     };
 
-    if (moveDirection != 0) {
+    if (moveDirection != IDLE) {
         isMoving = true;
-        playerPos.x += moveDirection * speed;
+        int newYHead = playerPos.y;
+        int newYFoot = playerPos.y + playerSize-1;
+        int newX;
+
+        if (moveDirection == RIGHT) {
+            newX = playerPos.x + moveDirection*speed + playerSize-1;
+        }
+        else if (moveDirection == LEFT) {
+            newX = playerPos.x + moveDirection*speed;
+        }
+
+        bool isFreeHead = isValid(newX, newYHead) && !map[newX][newYHead].isSolid;
+        bool isFreeFoot = isValid(newX, newYFoot) && !map[newX][newYFoot].isSolid;
+
+        if (isFreeHead && isFreeFoot) playerPos.x += moveDirection * speed;
     }
 
-    if (jumpRequest && isGrounded) {
+    if (jumpRequest) {
         velocity = -6;
         isGrounded = false;
         jumpRequest = false;
@@ -122,20 +137,11 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
 }
 
 void Player::handleInput() {
-    if (IsKeyPressed(KEY_SPACE)) {
+    if (IsKeyPressed(KEY_SPACE) && isGrounded) {
         jumpRequest = true;
     }
 
     moveDirection = 0;
-    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) moveDirection = -1;
-    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) moveDirection = 1;
-    
-}
-
-Vector2 Player::getPlayerPos() {
-    return playerPos;
-}
-
-int Player::getFrameWidth() {
-    return frameWidth;
+    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) moveDirection = LEFT;
+    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) moveDirection = RIGHT;
 }

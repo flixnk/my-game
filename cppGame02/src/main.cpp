@@ -1,10 +1,13 @@
+#include "enemy.h"
+#include "gameCamera.h"
 #include "raylib.h"
 #include "player.h"
 #include <cmath>
 #include "levels.h"
+#include "raymath.h"
 
 int main() {
-    Vector2 screenSize = { 200, 150 };
+    Vector2 screenSize = { 600, 400 };
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(screenSize.x,screenSize.y, "My Game02");
@@ -12,53 +15,57 @@ int main() {
     SetTargetFPS(144);
     ChangeDirectory(GetApplicationDirectory());
 
-    Camera2D camera = { 0 };
-    camera.rotation = 0.0f;
-    camera.zoom = 3.0f;
-
+    GameCamera gameCam;
     Player player;
     Level1 level1;
     level1.initLevel();
 
+    Enemy enemy({ 64, 64 });
+
     const std::vector<std::vector<Block>>& map = level1.getMap();
 
-    const float targetPhysicsFPS = 120.0f; 
+    const float targetPhysicsFPS = 128.0f; 
     const float dt = 1.0f / targetPhysicsFPS;
     float accumulator = 0.0f;
 
-    float cameraSmoothSpeed = 10.0f;
+    gameCam.handleResize(player.getFrameWidth());
 
     while (!WindowShouldClose()) {
         if (IsWindowResized()) {
-            screenSize.x = GetScreenWidth();
-            screenSize.y = GetScreenHeight();
-
-            int frameWidth = player.getFrameWidth();
-            camera.offset.x = floorf(screenSize.x / 2.0f - frameWidth*camera.zoom/2);
-            camera.offset.y = floorf(screenSize.y / 2.0f - frameWidth*camera.zoom/2);
+            gameCam.handleResize(player.getFrameWidth());
         }
-
-        accumulator += GetFrameTime();
+        
         player.handleInput();
 
+        accumulator += GetFrameTime();
         while (accumulator >= dt) {
             player.movement(map);
+            enemy.movement(map);
             accumulator -= dt;
         }
 
-        Vector2 playerPos = player.getPlayerPos();
-        float deltaTime = GetFrameTime();
+        float alpha = accumulator / dt;
 
-        camera.target.x += (playerPos.x - camera.target.x) * cameraSmoothSpeed * deltaTime;
-        camera.target.y += (playerPos.y - camera.target.y) * cameraSmoothSpeed * deltaTime;
+        Vector2 playerPosNow = player.getPos();
+        Vector2 playerPosOld = player.getOldPos();
+
+        Vector2 renderPos = Vector2Lerp(playerPosOld, playerPosNow, alpha);
+
+        Vector2 enemyPosNow = enemy.getPos();
+        Vector2 enemyPosOld = enemy.getOldPos();
+
+        Vector2 enemyRenderPos = Vector2Lerp(enemyPosOld, enemyPosNow, alpha);
+
+        gameCam.update(renderPos, GetFrameTime());
 
         BeginDrawing();
             ClearBackground(BLUE);
-            BeginMode2D(camera);
+            BeginMode2D(gameCam.getRaylibCam());
                 level1.draw();
-                player.animate();
-                DrawFPS(10, 10);
+                enemy.animate(enemyRenderPos);
+                player.animate(renderPos);
             EndMode2D();
+            DrawFPS(10, 10);
         EndDrawing();
     }
     CloseWindow();

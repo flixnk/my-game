@@ -1,0 +1,135 @@
+#include "enemy.h"
+#include <cstdlib>
+
+Enemy::Enemy(Vector2 enemyPos) {
+    coinEnemySprite = LoadTexture("../assets/coin_enemy.png");
+    SetTextureFilter(coinEnemySprite, TEXTURE_FILTER_POINT);
+
+    if (coinEnemySprite.id == 0) {
+        TraceLog(LOG_ERROR, "Failed to load coin enemy png");
+    }
+
+    position = enemyPos;
+    oldEnemyPos = position;
+    numFrames = 3;
+    currentFrame = 0;
+    frameTimer = 0.0f;
+    frameSpeed = 0.2f;
+    frameWidth = (float)coinEnemySprite.width / numFrames;
+
+    playerSize = { frameWidth, (float)coinEnemySprite.height };
+    isMoving = false;
+    moveDirection = RIGHT;
+    velocity = 0;
+    isGrounded = false;
+
+    hitboxWidth = frameWidth / 2;
+    hitboxHeight = coinEnemySprite.height / 2;
+    offsetX = (frameWidth - hitboxWidth) / 2;
+    offsetY = coinEnemySprite.height - hitboxHeight;
+}
+
+Enemy::~Enemy() {
+    UnloadTexture(coinEnemySprite);
+}
+
+void Enemy::animate(Vector2 enemyRenderPos) {
+    if (isMoving) {
+        if (currentFrame == 0) currentFrame = 1;
+
+        frameTimer += GetFrameTime();
+        if (frameTimer >= frameSpeed) {
+            frameTimer = 0.0f;
+            currentFrame++;
+
+        if (currentFrame >= numFrames)
+            currentFrame = 1;
+        }
+    } else {
+        currentFrame = 0;
+    }
+
+    Rectangle source = {0.0f, 0.0f, frameWidth, (float)coinEnemySprite.height};
+    source.x = (float)currentFrame * frameWidth;
+
+    if (moveDirection == LEFT) {
+        source.width = -frameWidth;
+    } else {
+        source.width = frameWidth;
+    }
+
+    Rectangle dest = {enemyRenderPos.x, enemyRenderPos.y, frameWidth, (float)coinEnemySprite.height};
+    DrawTexturePro(coinEnemySprite, source, dest, {0, 0}, 0.0f, WHITE);
+}
+
+void Enemy::movement(const std::vector<std::vector<Block>>& map) {
+    oldEnemyPos = position;
+    int speed = 2;
+    isMoving = false;
+
+    auto isValid = [&](int x, int y) {
+        if (x < 0 || x >= map.size()) return false;
+        if (y < 0 || y >= map[0].size()) return false;
+        return true;
+    };
+
+    if (moveDirection != IDLE) {
+        isMoving = true;
+        int newYHead = position.y;
+        int newYFoot = position.y + playerSize.y-1;
+        int newX = 0;
+
+        if (moveDirection == RIGHT) {
+            newX = position.x + moveDirection*speed + playerSize.y-1;
+        }
+        else if (moveDirection == LEFT) {
+            newX = position.x + moveDirection*speed;
+        }
+
+        bool isFreeHead = isValid(newX, newYHead) && !map[newX][newYHead].isSolid;
+        bool isFreeFoot = isValid(newX, newYFoot) && !map[newX][newYFoot].isSolid;
+
+        if (isFreeHead && isFreeFoot) position.x += moveDirection * speed;
+        else if (moveDirection == RIGHT) moveDirection = LEFT;
+        else if (moveDirection == LEFT) moveDirection = RIGHT;
+    }
+
+    velocity += 0.125f;
+
+    if (velocity > 40) velocity = 40;
+
+    int steps = abs((int)velocity); 
+    int direction = (velocity > 0) ? 1 : -1;
+
+    for (int i = 0; i < steps; i++) {
+        
+        int nextY = position.y + direction;
+        bool hitSolid = false;
+
+        if (direction > 0) {
+             int feetPos = nextY + playerSize.y - 1;
+             
+             if ((isValid(position.x, feetPos) && map[position.x][feetPos].isSolid) ||
+                 (isValid(position.x + playerSize.x - 1, feetPos) && map[position.x + playerSize.x - 1][feetPos].isSolid)) {
+                 hitSolid = true;
+             }
+        } 
+        else {
+             if ((isValid(position.x, nextY) && map[position.x][nextY].isSolid) ||
+                 (isValid(position.x + playerSize.x - 1, nextY) && map[position.x + playerSize.x - 1][nextY].isSolid)) {
+                 hitSolid = true;
+             }
+        }
+
+        if (hitSolid) {
+            velocity = 0;
+            if (direction > 0) {
+                isGrounded = true; 
+            }
+            break;
+        } else {
+            position.y = nextY;
+            isGrounded = false;
+        }
+    }
+}

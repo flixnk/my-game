@@ -3,13 +3,6 @@
 
 enum BlockType { AIR = 0, STONE = 1, FLAG = 13 };
 
-typedef enum GameScreen { 
-    MENU, 
-    GAMEPLAY, 
-    WIN,
-    LOSS
-} GameScreen;
-
 #pragma once
 struct Block {
     BlockType type;

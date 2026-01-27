@@ -11,6 +11,7 @@ class LevelMaker {
     ~LevelMaker();
 
     void addPlatform(int posX, int posY, int width, int height, Block ressource, std::vector<std::vector<Block>>& levelMap, int spriteSize);
+    void addEnemy();
 };
 
 #endif
