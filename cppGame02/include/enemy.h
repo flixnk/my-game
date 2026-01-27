@@ -20,6 +20,7 @@ class Enemy {
 
     Vector2 getPos() const { return position; }
     Vector2 getOldPos() const { return oldEnemyPos; }
+    Rectangle getHitbox() const;
 
     private:
     Texture2D coinEnemySprite;
@@ -32,14 +33,11 @@ class Enemy {
     bool isMoving;
     int moveDirection;
     Vector2 playerSize;
+    Vector2 hitboxSize;
     float velocity;
     bool isGrounded;
     Vector2 oldEnemyPos;
-
-    int hitboxWidth;
-    int hitboxHeight;
-    int offsetX;
-    int offsetY;
+    bool showDebug;
 };
 
 #endif

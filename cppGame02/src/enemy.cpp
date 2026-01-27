@@ -16,17 +16,13 @@ Enemy::Enemy(Vector2 enemyPos) {
     frameTimer = 0.0f;
     frameSpeed = 0.2f;
     frameWidth = (float)coinEnemySprite.width / numFrames;
-
     playerSize = { frameWidth, (float)coinEnemySprite.height };
+    hitboxSize = { frameWidth/1.75f, (float)coinEnemySprite.height/1.75f };
     isMoving = false;
     moveDirection = RIGHT;
     velocity = 0;
     isGrounded = false;
-
-    hitboxWidth = frameWidth / 2;
-    hitboxHeight = coinEnemySprite.height / 2;
-    offsetX = (frameWidth - hitboxWidth) / 2;
-    offsetY = coinEnemySprite.height - hitboxHeight;
+    showDebug = false;
 }
 
 Enemy::~Enemy() {
@@ -60,6 +56,24 @@ void Enemy::animate(Vector2 enemyRenderPos) {
 
     Rectangle dest = {enemyRenderPos.x, enemyRenderPos.y, frameWidth, (float)coinEnemySprite.height};
     DrawTexturePro(coinEnemySprite, source, dest, {0, 0}, 0.0f, WHITE);
+
+    if (IsKeyPressed(KEY_F3)) {
+        showDebug = !showDebug;
+    }
+
+    if (showDebug) {
+        float offsetX = (frameWidth - hitboxSize.x) / 2.0f;
+        float offsetY = (coinEnemySprite.height - hitboxSize.y) / 2.0f;
+
+        Rectangle debugRect = { 
+            enemyRenderPos.x + offsetX, 
+            enemyRenderPos.y + offsetY, 
+            hitboxSize.x, 
+            hitboxSize.y 
+        };
+
+        DrawRectangleLinesEx(debugRect, 1.0f, RED);
+    }
 }
 
 void Enemy::movement(const std::vector<std::vector<Block>>& map) {
@@ -80,7 +94,7 @@ void Enemy::movement(const std::vector<std::vector<Block>>& map) {
         int newX = 0;
 
         if (moveDirection == RIGHT) {
-            newX = position.x + moveDirection*speed + playerSize.y-1;
+            newX = position.x + moveDirection*speed + playerSize.x-1;
         }
         else if (moveDirection == LEFT) {
             newX = position.x + moveDirection*speed;
@@ -132,4 +146,16 @@ void Enemy::movement(const std::vector<std::vector<Block>>& map) {
             isGrounded = false;
         }
     }
+}
+
+Rectangle Enemy::getHitbox() const {
+    float offsetX = (frameWidth - hitboxSize.x) / 2.0f;
+    float offsetY = (coinEnemySprite.height - hitboxSize.y) / 2.0f;
+
+    return { 
+        position.x + offsetX, 
+        position.y + offsetY, 
+        hitboxSize.x, 
+        hitboxSize.y 
+    };
 }

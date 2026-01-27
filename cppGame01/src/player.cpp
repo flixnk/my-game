@@ -112,9 +112,10 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
   }
 
   if (vertVelocity > 0) {
-      vertVelocity += 0.35f; //falling
-  } else {
-      vertVelocity += 0.20f; //going up
+    vertVelocity += 0.35f; //falling
+  } 
+  else {
+    vertVelocity += 0.20f; //going up
   }
 
   if (vertVelocity > 20) {
