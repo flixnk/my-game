@@ -10,13 +10,12 @@ class Player {
     Player();
     ~Player();
 
-    void animate();
+    void animate(Vector2 renderPos);
     void movement(const std::vector<std::vector<Block>>& map);
     void handleInput();
 
-    Vector2 getPlayerPos();
-    int getFrameWidth();
-    Vector2 getPos() const { return position; }
+    int getFrameWidth() const { return frameWidth; }
+    Vector2 getPos() const { return playerPos; }
     Vector2 getOldPos() const { return oldPosition; }
 
     private:
@@ -34,7 +33,6 @@ class Player {
     bool showDebug;
     bool jumpRequest;
     int moveDirection;
-    Vector2 position;
     Vector2 oldPosition;
 };
 

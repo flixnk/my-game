@@ -28,6 +28,7 @@ class Level1 : public Level {
 
     private:
     Texture2D stoneBlockSprite;
+    Texture2D flagSprite;
 };
 
 #endif
