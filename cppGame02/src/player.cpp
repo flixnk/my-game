@@ -96,7 +96,12 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
         jumpRequest = false;
     }
 
-    velocity += 0.125f;
+    if (velocity > 0) {
+        velocity += 0.25f; //falling
+    } 
+    else {
+        velocity += 0.15f; //going up
+    }
 
     if (velocity > 40) velocity = 40;
 
