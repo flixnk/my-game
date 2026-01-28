@@ -1,38 +1,37 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 project(cppGame02 VERSION 1.0 LANGUAGES CXX)
 
-set(RAYLIB_SRC_PATH "$ENV{HOME}/Apps/raylib/src")
+set(CMAKE_CXX_STANDARD 17)
 
-find_library(RAYLIB_LIB 
-    NAMES raylib libraylib.a
-    PATHS ${RAYLIB_SRC_PATH}
-    NO_DEFAULT_PATH
+include(FetchContent)
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+    raylib
+    GIT_REPOSITORY https://github.com/raysan5/raylib.git
+    GIT_TAG        master
 )
-
-find_path(RAYLIB_INCLUDE_DIR 
-    NAMES raylib.h 
-    PATHS ${RAYLIB_SRC_PATH}
-    NO_DEFAULT_PATH
-)
-
-message(STATUS "Raylib Lib: ${RAYLIB_LIB}")
-message(STATUS "Raylib Include: ${RAYLIB_INCLUDE_DIR}")
-
-if(NOT RAYLIB_LIB OR NOT RAYLIB_INCLUDE_DIR)
-    message(FATAL_ERROR "raylib-Dateien fehlen immer noch in ${RAYLIB_SRC_PATH}!")
-endif()
+FetchContent_MakeAvailable(raylib)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "main.cpp")
-add_executable(${PROJECT_NAME} ${SOURCES})
+
+if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/logo.rc")
+    add_executable(${PROJECT_NAME} ${SOURCES} logo.rc)
+else()
+    add_executable(${PROJECT_NAME} ${SOURCES})
+endif()
+
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
+
+if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    target_link_options(${PROJECT_NAME} PRIVATE -static)
+endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
-    ${RAYLIB_INCLUDE_DIR}
     include
     include/entities
     include/example_data
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    ${RAYLIB_LIB}
-    m pthread dl
-)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
