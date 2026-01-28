@@ -70,7 +70,7 @@ void Enemy::animate(Vector2 enemyRenderPos) {
 
 void Enemy::movement(const std::vector<std::vector<Block>>& map) {
     oldEnemyPos = position;
-    int speed = 2;
+    float speed = 1.5f;
     isMoving = false;
 
     auto isValid = [&](int x, int y) {
@@ -80,7 +80,6 @@ void Enemy::movement(const std::vector<std::vector<Block>>& map) {
     };
 
     if (moveDirection != IDLE) {
-        isMoving = true;
         int newYHead = position.y;
         int newYFoot = position.y + playerSize.y-1;
         int newX = 0;
@@ -95,7 +94,10 @@ void Enemy::movement(const std::vector<std::vector<Block>>& map) {
         bool isFreeHead = isValid(newX, newYHead) && !map[newX][newYHead].isSolid;
         bool isFreeFoot = isValid(newX, newYFoot) && !map[newX][newYFoot].isSolid;
 
-        if (isFreeHead && isFreeFoot) position.x += moveDirection * speed;
+        if (isFreeHead && isFreeFoot && isGrounded) { 
+            position.x += moveDirection * speed; 
+            isMoving = true;
+        }
         else if (moveDirection == RIGHT) moveDirection = LEFT;
         else if (moveDirection == LEFT) moveDirection = RIGHT;
     }

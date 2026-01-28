@@ -6,11 +6,16 @@
 #include <vector>
 #include "enemy.h"
 
+struct RenderObject {
+    Vector2 position;
+    BlockType type; 
+};
+
 class Level {
     public:
         virtual ~Level() {}
         virtual void initLevel() = 0;
-        virtual void draw(float alpha) = 0;
+        virtual void draw(float alpha, Camera2D camera) = 0;
 
         void updateEnemies();
         bool checkCollisionWithPlayer(Rectangle playerHitbox);
@@ -22,6 +27,8 @@ class Level {
         Texture2D backgroundSprite;
         std::vector<std::vector<Block>> map;
         std::vector<Enemy> enemies;
+
+        std::vector<RenderObject> renderList;
 };
 
 class Level1 : public Level {
@@ -29,7 +36,7 @@ class Level1 : public Level {
     Level1();
     ~Level1();
     void initLevel() override;
-    void draw(float alpha) override;
+    void draw(float alpha, Camera2D camera) override;
 
     private:
     Texture2D stoneBlockSprite;

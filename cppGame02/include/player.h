@@ -35,6 +35,7 @@ class Player {
     bool jumpRequest;
     int moveDirection;
     Vector2 oldPosition;
+    int checkUpHeight;
 };
 
 #endif

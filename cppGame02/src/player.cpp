@@ -10,7 +10,7 @@ Player::Player() {
         TraceLog(LOG_ERROR, "Failed to load player png");
     }
 
-    position = { 0, 0 };
+    position = { 32, 64 };
     oldPosition = position;
     numFrames = 3;
     currentFrame = 0;
@@ -25,6 +25,7 @@ Player::Player() {
     showDebug = false;
     jumpRequest = false;
     moveDirection = IDLE;
+    checkUpHeight = 10;
 }
 
 Player::~Player() { UnloadTexture(spriteSheet); }
@@ -89,6 +90,28 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
         bool isFreeFoot = isValid(newX, newYFoot) && !map[newX][newYFoot].isSolid;
 
         if (isFreeHead && isFreeFoot) position.x += moveDirection * speed;
+        else if (isFreeHead) {
+            //Logic for going up small blocks
+            for (int i = 1; i <= checkUpHeight; i++) {
+                int checkUpY = newYFoot - i;
+                if (isValid(newX, checkUpY) && !map[newX][checkUpY].isSolid) {
+                    int checkAbove = position.y - i;
+                    int checkAboveLeft = position.x;
+                    int checkAboveRight = position.x + playerSize.x -1;
+
+                    bool isFreeLeft = isValid(checkAboveLeft, checkAbove) && !map[checkAboveLeft][checkAbove].isSolid;
+                    bool isFreeRight = isValid(checkAboveRight, checkAbove) && !map[checkAboveRight][checkAbove].isSolid;
+
+                    //Checking if there is a block above the player
+                    if (!isFreeLeft || !isFreeRight) break;
+                    
+                    position.y -= i;
+                    position.x += moveDirection * speed;
+                    break;
+                    
+                }
+            }
+        }
     }
 
     if (jumpRequest) {

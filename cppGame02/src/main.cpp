@@ -1,4 +1,3 @@
-#include "enemy.h"
 #include "gameCamera.h"
 #include "raylib.h"
 #include "player.h"
@@ -13,7 +12,7 @@ int main() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(screenSize.x,screenSize.y, "My Game02");
     MaximizeWindow();
-    SetTargetFPS(144);
+    SetTargetFPS(420);
     ChangeDirectory(GetApplicationDirectory());
 
     GameCamera gameCam;
@@ -55,7 +54,7 @@ int main() {
         BeginDrawing();
             ClearBackground(BLUE);
             BeginMode2D(gameCam.getRaylibCam());
-                level1.draw(alpha);
+                level1.draw(alpha, gameCam.getRaylibCam());
                 player.animate(renderPos);
             EndMode2D();
             DrawFPS(10, 10);

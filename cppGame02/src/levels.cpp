@@ -18,7 +18,7 @@ bool Level::checkCollisionWithPlayer(Rectangle playerHitbox) {
 }
 
 Level1::Level1() {
-    levelSize = { 800, 300 }; //should both be divisible by the size of your background png
+    levelSize = { 8000, 300 }; //should both be divisible by the size of your background png
     backgroundSprite = LoadTexture("../assets/light_stone_block.png");
     SetTextureFilter(backgroundSprite, TEXTURE_FILTER_POINT);
     if (backgroundSprite.id == 0) {
@@ -64,39 +64,63 @@ Level1::~Level1() {
 void Level1::initLevel() {
     LevelMaker levelMaker;
 
-    levelMaker.addPlatform(0, 0, map.size(), map[0].size(), AIR, map, backgroundSprite.height);
-    levelMaker.addPlatform(0, map[0].size()-32, map.size(), 32, Block { STONE, true}, map, stoneBlockSprite.height);
+    const int STS = 32; //STANDARD_TILE_SIZE
+    const int mapW = map.size();
+    const int mapH = map[0].size();
 
-    levelMaker.addPlatform(4, map[0].size()-64, 32, 32, Block { STONE, true}, map, stoneBlockSprite.height);
-    levelMaker.addPlatform(36, map[0].size()-128, 32, 96, Block { STONE, true}, map, stoneBlockSprite.height);
+    Vector2 stoneSize = { (float)stoneBlockSprite.height, (float)stoneBlockSprite.width };
+    Vector2 flagSize = { (float)flagSprite.height, (float)flagSprite.width };
 
-    levelMaker.addPlatform(map.size()-32, map[0].size()-64, 32, 32, { FLAG, false, false, true }, map, flagSprite.height);
+    levelMaker.addPlatform(0, mapH-STS, mapW, STS, { STONE, true}, map, stoneSize);
 
-    enemies.push_back(Enemy({ 200, 100 }, coinEnemySprite));
-    enemies.push_back(Enemy({ 400, 100 }, coinEnemySprite));
+    levelMaker.addPlatform(STS*5, mapH-STS-10, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*6, mapH-STS*3, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*3, mapH-STS*4, STS, STS*3, { STONE, true}, map, stoneSize);
+
+    levelMaker.addPlatform(mapW-STS, mapH-STS*2, STS, STS, { FLAG, false, false, true }, map, flagSize);
+
+    renderList.clear(); 
+    
+    for (int i = 0; i < map.size(); i++) {
+        for (int j = 0; j < map[0].size(); j++) {
+            if (map[i][j].isRenderOrigin) {
+                renderList.push_back({ 
+                    {(float)i, (float)j},
+                    map[i][j].type
+                });
+            }
+        }
+    }
+
+    enemies.push_back(Enemy({ STS*7, STS*3 }, coinEnemySprite));
+    enemies.push_back(Enemy({ STS*10, STS*3 }, coinEnemySprite));
 }
 
-void Level1::draw(float alpha) {
-    for (int i = 0; i < map.size(); i+=backgroundSprite.width) {
+void Level1::draw(float alpha, Camera2D camera) {
+    int startX = (int)(camera.target.x - (camera.offset.x / camera.zoom)) - 100;
+    int endX   = (int)(camera.target.x + ((GetScreenWidth() - camera.offset.x) / camera.zoom)) + 100;
+
+    if (startX < 0) startX = 0;
+    if (endX > map.size()) endX = map.size();
+
+    int bgStart = (startX / backgroundSprite.width) * backgroundSprite.width;
+
+    for (int i = bgStart; i < endX; i+= backgroundSprite.width) {
         for (int j = 0; j < map[0].size(); j+=backgroundSprite.height) {
             DrawTexture(backgroundSprite, i, j, WHITE);
         }
     }
 
-    for (int i = 0; i < map.size(); i++) {
-        for (int j = 0; j < map[0].size(); j++) {
-            if (map[i][j].isRenderOrigin) {
-                if (map[i][j].type == STONE) {
-                    Rectangle source = { 0, 0, (float)stoneBlockSprite.width, (float)stoneBlockSprite.height };
-                    Rectangle dest = { (float)i, (float)j, (float)stoneBlockSprite.width, (float)stoneBlockSprite.height };
-                    DrawTexturePro(stoneBlockSprite, source, dest, { 0.0f, 0.0f }, 0.0f, WHITE);
-                }
-                if (map[i][j].type == FLAG) {
-                    Rectangle source = { 0, 0, (float)flagSprite.width, (float)flagSprite.height };
-                    Rectangle dest = { (float)i, (float)j, (float)flagSprite.width, (float)flagSprite.height };
-                    DrawTexturePro(flagSprite, source, dest, { 0.0f, 0.0f }, 0.0f, WHITE);
-                }
-            }
+    for (const auto& obj : renderList) {
+        if (obj.position.x < startX || obj.position.x > endX) {
+            continue; 
+        }
+
+        if (obj.type == STONE) {
+            DrawTexture(stoneBlockSprite, (int)obj.position.x, (int)obj.position.y, WHITE);
+        }
+        else if (obj.type == FLAG) {
+            DrawTexture(flagSprite, (int)obj.position.x, (int)obj.position.y, WHITE);
         }
     }
 
