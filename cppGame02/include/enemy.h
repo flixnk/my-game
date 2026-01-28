@@ -13,7 +13,7 @@ enum Direction {
 
 class Enemy {
     public:
-    Enemy(Vector2 enemyPos);
+    Enemy(Vector2 enemyPos, Texture2D sprite);
     ~Enemy();
     void animate(Vector2 enemyRenderPos);
     void movement(const std::vector<std::vector<Block>>& map);

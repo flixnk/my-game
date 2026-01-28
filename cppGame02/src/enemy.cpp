@@ -1,14 +1,8 @@
 #include "enemy.h"
 #include <cstdlib>
 
-Enemy::Enemy(Vector2 enemyPos) {
-    coinEnemySprite = LoadTexture("../assets/coin_enemy.png");
-    SetTextureFilter(coinEnemySprite, TEXTURE_FILTER_POINT);
-
-    if (coinEnemySprite.id == 0) {
-        TraceLog(LOG_ERROR, "Failed to load coin enemy png");
-    }
-
+Enemy::Enemy(Vector2 enemyPos, Texture2D sprite) {
+    coinEnemySprite = sprite;
     position = enemyPos;
     oldEnemyPos = position;
     numFrames = 3;
@@ -25,9 +19,7 @@ Enemy::Enemy(Vector2 enemyPos) {
     showDebug = false;
 }
 
-Enemy::~Enemy() {
-    UnloadTexture(coinEnemySprite);
-}
+Enemy::~Enemy() {}
 
 void Enemy::animate(Vector2 enemyRenderPos) {
     if (isMoving) {

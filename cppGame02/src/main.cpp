@@ -21,8 +21,6 @@ int main() {
     Level1 level1;
     level1.initLevel();
 
-    Enemy enemy({ 64, 64 });
-
     const std::vector<std::vector<Block>>& map = level1.getMap();
 
     const float targetPhysicsFPS = 128.0f; 
@@ -41,8 +39,8 @@ int main() {
         accumulator += GetFrameTime();
         while (accumulator >= dt) {
             player.movement(map);
-            enemy.movement(map);
-            if (CheckCollisionRecs(player.getHitbox(), enemy.getHitbox())) throw std::runtime_error("Touched an enemy!");
+            level1.updateEnemies();
+            if (level1.checkCollisionWithPlayer(player.getHitbox())) throw std::runtime_error("Touched an enemy!");
             accumulator -= dt;
         }
 
@@ -52,17 +50,12 @@ int main() {
         Vector2 playerPosOld = player.getOldPos();
         Vector2 renderPos = Vector2Lerp(playerPosOld, playerPosNow, alpha);
 
-        Vector2 enemyPosNow = enemy.getPos();
-        Vector2 enemyPosOld = enemy.getOldPos();
-        Vector2 enemyRenderPos = Vector2Lerp(enemyPosOld, enemyPosNow, alpha);
-
         gameCam.update(renderPos, GetFrameTime());
 
         BeginDrawing();
             ClearBackground(BLUE);
             BeginMode2D(gameCam.getRaylibCam());
-                level1.draw();
-                enemy.animate(enemyRenderPos);
+                level1.draw(alpha);
                 player.animate(renderPos);
             EndMode2D();
             DrawFPS(10, 10);

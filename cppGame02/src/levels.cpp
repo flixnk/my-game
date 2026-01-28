@@ -1,5 +1,21 @@
 #include "levels.h"
 #include "levelMaker.h"
+#include <raymath.h>
+
+void Level::updateEnemies() {
+    for (auto& enemy : enemies) {
+        enemy.movement(map);
+    }
+}
+
+bool Level::checkCollisionWithPlayer(Rectangle playerHitbox) {
+    for (const auto& enemy : enemies) {
+        if (CheckCollisionRecs(playerHitbox, enemy.getHitbox())) {
+            return true;
+        }
+    }
+    return false;
+}
 
 Level1::Level1() {
     levelSize = { 800, 300 }; //should both be divisible by the size of your background png
@@ -21,14 +37,20 @@ Level1::Level1() {
 
     stoneBlockSprite = LoadTexture("../assets/stone_block.png");
     SetTextureFilter(backgroundSprite, TEXTURE_FILTER_POINT);
-    if (backgroundSprite.id == 0) {
+    if (stoneBlockSprite.id == 0) {
         TraceLog(LOG_ERROR, "Failed to load stone_block png.");
     }
 
     flagSprite = LoadTexture("../assets/flag.png");
     SetTextureFilter(flagSprite, TEXTURE_FILTER_POINT);
     if (flagSprite.id == 0) {
-        TraceLog(LOG_ERROR, "Failed to load stone_block png.");
+        TraceLog(LOG_ERROR, "Failed to load flag png.");
+    }
+
+    coinEnemySprite = LoadTexture("../assets/coin_enemy.png");
+    SetTextureFilter(coinEnemySprite, TEXTURE_FILTER_POINT);
+    if (coinEnemySprite.id == 0) {
+        TraceLog(LOG_ERROR, "Failed to load coin enemy png.");
     }
 }
 
@@ -36,6 +58,7 @@ Level1::~Level1() {
     UnloadTexture(backgroundSprite);
     UnloadTexture(stoneBlockSprite);
     UnloadTexture(flagSprite);
+    UnloadTexture(coinEnemySprite);
 }
 
 void Level1::initLevel() {
@@ -48,9 +71,12 @@ void Level1::initLevel() {
     levelMaker.addPlatform(36, map[0].size()-128, 32, 96, Block { STONE, true}, map, stoneBlockSprite.height);
 
     levelMaker.addPlatform(map.size()-32, map[0].size()-64, 32, 32, { FLAG, false, false, true }, map, flagSprite.height);
+
+    enemies.push_back(Enemy({ 200, 100 }, coinEnemySprite));
+    enemies.push_back(Enemy({ 400, 100 }, coinEnemySprite));
 }
 
-void Level1::draw() {
+void Level1::draw(float alpha) {
     for (int i = 0; i < map.size(); i+=backgroundSprite.width) {
         for (int j = 0; j < map[0].size(); j+=backgroundSprite.height) {
             DrawTexture(backgroundSprite, i, j, WHITE);
@@ -72,5 +98,14 @@ void Level1::draw() {
                 }
             }
         }
+    }
+
+    for (auto& enemy : enemies) {
+        Vector2 posNow = enemy.getPos();
+        Vector2 posOld = enemy.getOldPos();
+
+        Vector2 renderPos = Vector2Lerp(posOld, posNow, alpha);
+
+        enemy.animate(renderPos);
     }
 }
