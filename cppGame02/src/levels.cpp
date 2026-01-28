@@ -71,9 +71,6 @@ void Level1::initLevel() {
     Vector2 stoneSize = { (float)stoneBlockSprite.height, (float)stoneBlockSprite.width };
     Vector2 flagSize = { (float)flagSprite.height, (float)flagSprite.width };
 
-    //ground
-    levelMaker.addPlatform(0, mapH-STS, mapW, STS, { STONE, true}, map, stoneSize);
-
     //wall to the left
     levelMaker.addPlatform(0, 0, STS, mapH, { STONE, true}, map, stoneSize);
 
@@ -100,7 +97,7 @@ void Level1::initLevel() {
     levelMaker.addPlatform(STS*36, mapH-STS*7, STS, STS, { STONE, true}, map, stoneSize);
 
     //secret passage at the top
-    levelMaker.addPlatform(STS*39, mapH-STS*10, STS*10, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*40, mapH-STS*10, STS*10, STS, { STONE, true}, map, stoneSize);
 
     levelMaker.addPlatform(STS*45, mapH-STS-20, STS, STS, { STONE, true}, map, stoneSize);
 
@@ -114,6 +111,9 @@ void Level1::initLevel() {
 
     levelMaker.addPlatform(mapW-STS*2, mapH-STS*2, STS, STS, { STONE, true}, map, stoneSize);
     levelMaker.addPlatform(mapW-STS*2, mapH-STS*3, STS, STS, { FLAG, false, false, true }, map, flagSize);
+
+    //ground
+    levelMaker.addPlatform(0, mapH-STS, mapW, STS, { STONE, true}, map, stoneSize);
 
     renderList.clear(); 
     
