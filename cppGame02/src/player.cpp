@@ -10,7 +10,7 @@ Player::Player() {
         TraceLog(LOG_ERROR, "Failed to load player png");
     }
 
-    position = { 32, 64 };
+    position = { 32, 320 };
     oldPosition = position;
     numFrames = 3;
     currentFrame = 0;
@@ -64,7 +64,7 @@ void Player::animate(Vector2 renderPos) {
 
 void Player::movement(const std::vector<std::vector<Block>>& map) {
     oldPosition = position;
-    int speed = 2;
+    float speed = 1.75f;
     isMoving = false;
 
     auto isValid = [&](int x, int y) {

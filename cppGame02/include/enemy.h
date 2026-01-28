@@ -38,6 +38,7 @@ class Enemy {
     bool isGrounded;
     Vector2 oldEnemyPos;
     bool showDebug;
+    int checkUpHeight;
 };
 
 #endif

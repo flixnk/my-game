@@ -13,10 +13,11 @@ Enemy::Enemy(Vector2 enemyPos, Texture2D sprite) {
     playerSize = { frameWidth, (float)coinEnemySprite.height };
     hitboxSize = { frameWidth/1.75f, (float)coinEnemySprite.height/1.75f };
     isMoving = false;
-    moveDirection = RIGHT;
+    moveDirection = LEFT;
     velocity = 0;
     isGrounded = false;
     showDebug = false;
+    checkUpHeight = 10;
 }
 
 Enemy::~Enemy() {}
@@ -70,7 +71,7 @@ void Enemy::animate(Vector2 enemyRenderPos) {
 
 void Enemy::movement(const std::vector<std::vector<Block>>& map) {
     oldEnemyPos = position;
-    float speed = 1.5f;
+    float speed = 1.0f;
     isMoving = false;
 
     auto isValid = [&](int x, int y) {
@@ -79,7 +80,7 @@ void Enemy::movement(const std::vector<std::vector<Block>>& map) {
         return true;
     };
 
-    if (moveDirection != IDLE) {
+    if (moveDirection != IDLE && isGrounded) {
         int newYHead = position.y;
         int newYFoot = position.y + playerSize.y-1;
         int newX = 0;
@@ -94,12 +95,41 @@ void Enemy::movement(const std::vector<std::vector<Block>>& map) {
         bool isFreeHead = isValid(newX, newYHead) && !map[newX][newYHead].isSolid;
         bool isFreeFoot = isValid(newX, newYFoot) && !map[newX][newYFoot].isSolid;
 
-        if (isFreeHead && isFreeFoot && isGrounded) { 
+        bool hasMoved = false;
+
+        if (isFreeHead && isFreeFoot) { 
             position.x += moveDirection * speed; 
             isMoving = true;
+            hasMoved = true;
         }
-        else if (moveDirection == RIGHT) moveDirection = LEFT;
-        else if (moveDirection == LEFT) moveDirection = RIGHT;
+        else if (isFreeHead) {
+            //Logic for going up small blocks
+            for (int i = 1; i <= checkUpHeight; i++) {
+                int checkUpY = newYFoot - i;
+                if (isValid(newX, checkUpY) && !map[newX][checkUpY].isSolid) {
+                    int checkAbove = position.y - i;
+                    int checkAboveLeft = position.x;
+                    int checkAboveRight = position.x + playerSize.x -1;
+
+                    bool isFreeLeft = isValid(checkAboveLeft, checkAbove) && !map[checkAboveLeft][checkAbove].isSolid;
+                    bool isFreeRight = isValid(checkAboveRight, checkAbove) && !map[checkAboveRight][checkAbove].isSolid;
+
+                    //Checking if there is a block above the enemy
+                    if (!isFreeLeft || !isFreeRight) break;
+                    
+                    position.y -= i;
+                    position.x += moveDirection * speed;
+                    hasMoved = true;
+                    break;
+                    
+                }
+            }
+        }
+
+        if (!hasMoved) {
+            if (moveDirection == RIGHT) moveDirection = LEFT;
+            else if (moveDirection == LEFT) moveDirection = RIGHT;
+        }
     }
 
     velocity += 0.125f;

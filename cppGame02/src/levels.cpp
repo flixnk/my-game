@@ -18,7 +18,7 @@ bool Level::checkCollisionWithPlayer(Rectangle playerHitbox) {
 }
 
 Level1::Level1() {
-    levelSize = { 8000, 300 }; //should both be divisible by the size of your background png
+    levelSize = { 2000, 450 };
     backgroundSprite = LoadTexture("../assets/light_stone_block.png");
     SetTextureFilter(backgroundSprite, TEXTURE_FILTER_POINT);
     if (backgroundSprite.id == 0) {
@@ -71,13 +71,49 @@ void Level1::initLevel() {
     Vector2 stoneSize = { (float)stoneBlockSprite.height, (float)stoneBlockSprite.width };
     Vector2 flagSize = { (float)flagSprite.height, (float)flagSprite.width };
 
+    //ground
     levelMaker.addPlatform(0, mapH-STS, mapW, STS, { STONE, true}, map, stoneSize);
 
-    levelMaker.addPlatform(STS*5, mapH-STS-10, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*6, mapH-STS*3, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*3, mapH-STS*4, STS, STS*3, { STONE, true}, map, stoneSize);
+    //wall to the left
+    levelMaker.addPlatform(0, 0, STS, mapH, { STONE, true}, map, stoneSize);
 
-    levelMaker.addPlatform(mapW-STS, mapH-STS*2, STS, STS, { FLAG, false, false, true }, map, flagSize);
+    levelMaker.addPlatform(STS*5, mapH-STS*4, STS*4, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*6, mapH-STS*7, STS*2, STS, { STONE, true}, map, stoneSize);
+
+    levelMaker.addPlatform(STS*14, mapH-STS*3, STS, STS*2, { STONE, true}, map, stoneSize);
+
+    //small hill
+    levelMaker.addPlatform(STS*19, mapH-STS-5, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*19.5f, mapH-STS-10, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*20, mapH-STS-15, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*20.5f, mapH-STS-18, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*21, mapH-STS-15, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*21.5f, mapH-STS-10, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*22, mapH-STS-5, STS, STS, { STONE, true}, map, stoneSize);
+   
+    //two small walls
+    levelMaker.addPlatform(STS*26, mapH-STS*4, STS, STS*3, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*30, mapH-STS*3, STS, STS*2, { STONE, true}, map, stoneSize);
+
+    //floating blocks
+    levelMaker.addPlatform(STS*35, mapH-STS*4, STS*3, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(STS*36, mapH-STS*7, STS, STS, { STONE, true}, map, stoneSize);
+
+    //secret passage at the top
+    levelMaker.addPlatform(STS*39, mapH-STS*10, STS*10, STS, { STONE, true}, map, stoneSize);
+
+    levelMaker.addPlatform(STS*45, mapH-STS-20, STS, STS, { STONE, true}, map, stoneSize);
+
+    //ramp at the end of the level
+    levelMaker.addPlatform(mapW-STS*11, mapH-STS-10, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(mapW-STS*10, mapH-STS-20, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(mapW-STS*9, mapH-STS-30, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(mapW-STS*8, mapH-STS*2-8, STS, STS*2, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(mapW-STS*7, mapH-STS*2-18, STS, STS*2, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(mapW-STS*6, mapH-STS*2-28, STS, STS*2, { STONE, true}, map, stoneSize);
+
+    levelMaker.addPlatform(mapW-STS*2, mapH-STS*2, STS, STS, { STONE, true}, map, stoneSize);
+    levelMaker.addPlatform(mapW-STS*2, mapH-STS*3, STS, STS, { FLAG, false, false, true }, map, flagSize);
 
     renderList.clear(); 
     
@@ -92,8 +128,10 @@ void Level1::initLevel() {
         }
     }
 
-    enemies.push_back(Enemy({ STS*7, STS*3 }, coinEnemySprite));
-    enemies.push_back(Enemy({ STS*10, STS*3 }, coinEnemySprite));
+    enemies.push_back(Enemy({ STS*13, STS*3 }, coinEnemySprite));
+    enemies.push_back(Enemy({ STS*25, STS*3 }, coinEnemySprite));
+    enemies.push_back(Enemy({ STS*37, STS*3 }, coinEnemySprite));
+    enemies.push_back(Enemy({ STS*44, STS*3 }, coinEnemySprite));
 }
 
 void Level1::draw(float alpha, Camera2D camera) {
