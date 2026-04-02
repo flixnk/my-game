@@ -10,7 +10,7 @@ int main() {
   Vector2 screenSize = {600, 400};
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  InitWindow(screenSize.x, screenSize.y, "My Game02");
+  InitWindow(screenSize.x, screenSize.y, "FlixGame");
   MaximizeWindow();
   SetTargetFPS(144);
   ChangeDirectory(GetApplicationDirectory());

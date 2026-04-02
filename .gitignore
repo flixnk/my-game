@@ -47,6 +47,10 @@ cmake_install.cmake
 
 # VS Code spezifisch
 .vscode/
+
+# Visual Studio (bene)
+.vs/
+
 tempCodeRunnerFile.cpp
 .cache
 

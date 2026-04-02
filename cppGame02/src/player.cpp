@@ -3,11 +3,13 @@
 #include "enemy.h"
 
 Player::Player() {
-    spriteSheet = LoadTexture("../assets/player_sheet_02.png");
+    spriteSheet = LoadTexture("assets/player_sheet_02.png");
     SetTextureFilter(spriteSheet, TEXTURE_FILTER_POINT);
 
     if (spriteSheet.id == 0) {
         TraceLog(LOG_ERROR, "Failed to load player png");
+        // no player, no game. exit.
+        exit(1);
     }
 
     position = { 32, 320 };
@@ -140,7 +142,7 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
         jumpRequest = false;
     }
 
-    if (!isGrounded && velocity < 0 && !IsKeyDown(KEY_SPACE)) {
+    if (!isGrounded && velocity < 0 && (!IsKeyDown(KEY_UP) && !IsKeyDown(KEY_W) && !IsKeyDown(KEY_SPACE))) {
         velocity *= 0.5f;
     }
 
@@ -190,7 +192,7 @@ void Player::movement(const std::vector<std::vector<Block>>& map) {
 }
 
 void Player::handleInput() {
-    if (IsKeyPressed(KEY_SPACE) && isGrounded) {
+    if ((IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W) || IsKeyPressed(KEY_SPACE)) && isGrounded) {
         jumpRequest = true;
     }
 
