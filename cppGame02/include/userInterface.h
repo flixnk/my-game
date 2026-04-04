@@ -2,16 +2,17 @@
 #define USERINTERFACE_H
 
 #include "raylib.h"
+
 class UserInterface {
-    public:
-    UserInterface();
-    ~UserInterface();
+public:
+  UserInterface();
+  ~UserInterface();
 
-    void draw(int heartsRemaining);
+  void draw(int heartsRemaining);
 
-    private:
-    Texture2D heartSprite;
-    Vector2 heartPos;
+private:
+  Texture2D heartSprite;
+  Vector2 heartPos;
 };
 
 #endif

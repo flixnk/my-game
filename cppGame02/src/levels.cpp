@@ -19,7 +19,7 @@ bool Level::checkCollisionWithPlayer(Rectangle playerHitbox) {
 
 Level1::Level1() {
     levelSize = { 2000, 450 };
-    backgroundSprite = LoadTexture("../assets/light_stone_block.png");
+    backgroundSprite = LoadTexture("assets/light_stone_block.png");
     SetTextureFilter(backgroundSprite, TEXTURE_FILTER_POINT);
     if (backgroundSprite.id == 0) {
         TraceLog(LOG_ERROR, "Failed to load background png.");
@@ -35,19 +35,19 @@ Level1::Level1() {
 
     map.resize(levelSize.x, std::vector<Block>(levelSize.y, AIR));
 
-    stoneBlockSprite = LoadTexture("../assets/stone_block.png");
+    stoneBlockSprite = LoadTexture("assets/stone_block.png");
     SetTextureFilter(backgroundSprite, TEXTURE_FILTER_POINT);
     if (stoneBlockSprite.id == 0) {
         TraceLog(LOG_ERROR, "Failed to load stone_block png.");
     }
 
-    flagSprite = LoadTexture("../assets/flag.png");
+    flagSprite = LoadTexture("assets/flag.png");
     SetTextureFilter(flagSprite, TEXTURE_FILTER_POINT);
     if (flagSprite.id == 0) {
         TraceLog(LOG_ERROR, "Failed to load flag png.");
     }
 
-    coinEnemySprite = LoadTexture("../assets/coin_enemy.png");
+    coinEnemySprite = LoadTexture("assets/coin_enemy.png");
     SetTextureFilter(coinEnemySprite, TEXTURE_FILTER_POINT);
     if (coinEnemySprite.id == 0) {
         TraceLog(LOG_ERROR, "Failed to load coin enemy png.");

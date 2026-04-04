@@ -1,6 +1,5 @@
 #include "gameCamera.h"
 #include <cmath>
-#include <iostream>
 
 GameCamera::GameCamera() {
     camera = { 0 };

@@ -1,7 +1,7 @@
 #include "userInterface.h"
 
 UserInterface::UserInterface() {
-    heartSprite = LoadTexture("../assets/heart.png");
+    heartSprite = LoadTexture("assets/heart.png");
     SetTextureFilter(heartSprite, TEXTURE_FILTER_POINT);
 
     if (heartSprite.id == 0) {
