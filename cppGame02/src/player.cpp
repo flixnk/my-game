@@ -12,6 +12,7 @@ Player::Player() {
   }
 
   position = {32, 320};
+  startPos = position;
   oldPosition = position;
   numFrames = 3;
   currentFrame = 0;
@@ -213,6 +214,12 @@ void Player::triggerHit() {
   if (!gotHit) {
     hp -= 1;
     gotHit = true;
-    hitTimer = 0.3f;
+    hitTimer = 3.0f;
   }
+}
+
+void Player::reset() {
+  hp = 3;
+  gotHit = false;
+  position = startPos;
 }

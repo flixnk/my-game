@@ -5,9 +5,8 @@
 #include "raymath.h"
 #include "screens.h"
 #include "userInterface.h"
+#include "utilities.h"
 #include <cmath>
-
-enum ScreenType { MENU = 0, WIN = 1, LOSS = 2, GAME = 3 };
 
 int main() {
   Vector2 screenSize = {600, 400};
@@ -19,7 +18,7 @@ int main() {
   SetTargetFPS(144);
   ChangeDirectory(GetApplicationDirectory());
 
-  OptionsScreen optionScreen;
+  MenuScreen menuScreen;
   WinScreen winScreen;
   LossScreen lossScreen;
   GameCamera gameCam;
@@ -75,21 +74,22 @@ int main() {
     }
     switch (currentScreen) {
     case MENU:
-      optionScreen.draw();
-      if (IsKeyPressed(KEY_ENTER)) {
-        currentScreen = GAME;
-      }
+      currentScreen = menuScreen.update();
+      menuScreen.draw();
+
       break;
     case WIN:
       winScreen.draw();
       if (IsKeyPressed(KEY_ENTER)) {
         currentScreen = MENU;
+        player.reset();
       }
       break;
     case LOSS:
       lossScreen.draw();
       if (IsKeyPressed(KEY_ENTER)) {
         currentScreen = MENU;
+        player.reset();
       }
       break;
     case GAME:
