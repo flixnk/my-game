@@ -1,173 +1,210 @@
 #include "levels.h"
 #include "levelMaker.h"
+#include "raylib.h"
 #include <raymath.h>
 
 void Level::updateEnemies() {
-    for (auto& enemy : enemies) {
-        enemy.movement(map);
-    }
+  for (auto &enemy : enemies) {
+    enemy.movement(map);
+  }
 }
 
 bool Level::checkCollisionWithPlayer(Rectangle playerHitbox) {
-    for (const auto& enemy : enemies) {
-        if (CheckCollisionRecs(playerHitbox, enemy.getHitbox())) {
-            return true;
-        }
+  for (const auto &enemy : enemies) {
+    if (CheckCollisionRecs(playerHitbox, enemy.getHitbox())) {
+      return true;
     }
-    return false;
+  }
+  return false;
+}
+
+bool Level::checkWin(Rectangle playerHitbox) {
+  Rectangle flagHitBox = {flagPos.x, flagPos.y, (float)flagSprite.width,
+                          (float)flagSprite.height};
+
+  return CheckCollisionRecs(playerHitbox, flagHitBox);
 }
 
 Level1::Level1() {
-    levelSize = { 2000, 450 };
-    backgroundSprite = LoadTexture("assets/light_stone_block.png");
-    SetTextureFilter(backgroundSprite, TEXTURE_FILTER_POINT);
-    if (backgroundSprite.id == 0) {
-        TraceLog(LOG_ERROR, "Failed to load background png.");
-    }
+  levelSize = {2000, 450};
+  backgroundSprite = LoadTexture("assets/light_stone_block.png");
+  SetTextureFilter(backgroundSprite, TEXTURE_FILTER_POINT);
+  if (backgroundSprite.id == 0) {
+    TraceLog(LOG_ERROR, "Failed to load background png.");
+  }
 
-    while ((int)levelSize.x % backgroundSprite.height != 0) {
-        levelSize.x += 1;
-    }
+  while ((int)levelSize.x % backgroundSprite.height != 0) {
+    levelSize.x += 1;
+  }
 
-    while ((int)levelSize.y % backgroundSprite.width != 0) {
-        levelSize.y += 1;
-    }
+  while ((int)levelSize.y % backgroundSprite.width != 0) {
+    levelSize.y += 1;
+  }
 
-    map.resize(levelSize.x, std::vector<Block>(levelSize.y, AIR));
+  map.resize(levelSize.x, std::vector<Block>(levelSize.y, AIR));
 
-    stoneBlockSprite = LoadTexture("assets/stone_block.png");
-    SetTextureFilter(backgroundSprite, TEXTURE_FILTER_POINT);
-    if (stoneBlockSprite.id == 0) {
-        TraceLog(LOG_ERROR, "Failed to load stone_block png.");
-    }
+  stoneBlockSprite = LoadTexture("assets/stone_block.png");
+  SetTextureFilter(backgroundSprite, TEXTURE_FILTER_POINT);
+  if (stoneBlockSprite.id == 0) {
+    TraceLog(LOG_ERROR, "Failed to load stone_block png.");
+  }
 
-    flagSprite = LoadTexture("assets/flag.png");
-    SetTextureFilter(flagSprite, TEXTURE_FILTER_POINT);
-    if (flagSprite.id == 0) {
-        TraceLog(LOG_ERROR, "Failed to load flag png.");
-    }
+  flagSprite = LoadTexture("assets/flag.png");
+  SetTextureFilter(flagSprite, TEXTURE_FILTER_POINT);
+  if (flagSprite.id == 0) {
+    TraceLog(LOG_ERROR, "Failed to load flag png.");
+  }
 
-    coinEnemySprite = LoadTexture("assets/coin_enemy.png");
-    SetTextureFilter(coinEnemySprite, TEXTURE_FILTER_POINT);
-    if (coinEnemySprite.id == 0) {
-        TraceLog(LOG_ERROR, "Failed to load coin enemy png.");
-    }
+  coinEnemySprite = LoadTexture("assets/coin_enemy.png");
+  SetTextureFilter(coinEnemySprite, TEXTURE_FILTER_POINT);
+  if (coinEnemySprite.id == 0) {
+    TraceLog(LOG_ERROR, "Failed to load coin enemy png.");
+  }
 }
 
 Level1::~Level1() {
-    UnloadTexture(backgroundSprite);
-    UnloadTexture(stoneBlockSprite);
-    UnloadTexture(flagSprite);
-    UnloadTexture(coinEnemySprite);
+  UnloadTexture(backgroundSprite);
+  UnloadTexture(stoneBlockSprite);
+  UnloadTexture(flagSprite);
+  UnloadTexture(coinEnemySprite);
 }
 
 void Level1::initLevel() {
-    LevelMaker levelMaker;
+  LevelMaker levelMaker;
 
-    const int STS = 32; //STANDARD_TILE_SIZE
-    const int mapW = map.size();
-    const int mapH = map[0].size();
+  const int STS = 32; // STANDARD_TILE_SIZE
+  const int mapW = map.size();
+  const int mapH = map[0].size();
 
-    Vector2 stoneSize = { (float)stoneBlockSprite.height, (float)stoneBlockSprite.width };
-    Vector2 flagSize = { (float)flagSprite.height, (float)flagSprite.width };
+  flagPos = {(float)(mapW - STS * 2), (float)(mapH - STS * 3)};
 
-    //wall to the left
-    levelMaker.addPlatform(0, 0, STS, mapH, { STONE, true}, map, stoneSize);
+  Vector2 stoneSize = {(float)stoneBlockSprite.height,
+                       (float)stoneBlockSprite.width};
+  Vector2 flagSize = {(float)flagSprite.height, (float)flagSprite.width};
 
-    levelMaker.addPlatform(STS*5, mapH-STS*4, STS*4, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*6, mapH-STS*7, STS*2, STS, { STONE, true}, map, stoneSize);
+  // wall to the left
+  levelMaker.addPlatform(0, 0, STS, mapH, {STONE, true}, map, stoneSize);
 
-    levelMaker.addPlatform(STS*14, mapH-STS*3, STS, STS*2, { STONE, true}, map, stoneSize);
+  levelMaker.addPlatform(STS * 5, mapH - STS * 4, STS * 4, STS, {STONE, true},
+                         map, stoneSize);
+  levelMaker.addPlatform(STS * 6, mapH - STS * 7, STS * 2, STS, {STONE, true},
+                         map, stoneSize);
 
-    //small hill
-    levelMaker.addPlatform(STS*19, mapH-STS-5, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*19.5f, mapH-STS-10, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*20, mapH-STS-15, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*20.5f, mapH-STS-18, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*21, mapH-STS-15, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*21.5f, mapH-STS-10, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*22, mapH-STS-5, STS, STS, { STONE, true}, map, stoneSize);
-   
-    //two small walls
-    levelMaker.addPlatform(STS*26, mapH-STS*4, STS, STS*3, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*30, mapH-STS*3, STS, STS*2, { STONE, true}, map, stoneSize);
+  levelMaker.addPlatform(STS * 14, mapH - STS * 3, STS, STS * 2, {STONE, true},
+                         map, stoneSize);
 
-    //floating blocks
-    levelMaker.addPlatform(STS*35, mapH-STS*4, STS*3, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(STS*36, mapH-STS*7, STS, STS, { STONE, true}, map, stoneSize);
+  // small hill
+  levelMaker.addPlatform(STS * 19, mapH - STS - 5, STS, STS, {STONE, true}, map,
+                         stoneSize);
+  levelMaker.addPlatform(STS * 19.5f, mapH - STS - 10, STS, STS, {STONE, true},
+                         map, stoneSize);
+  levelMaker.addPlatform(STS * 20, mapH - STS - 15, STS, STS, {STONE, true},
+                         map, stoneSize);
+  levelMaker.addPlatform(STS * 20.5f, mapH - STS - 18, STS, STS, {STONE, true},
+                         map, stoneSize);
+  levelMaker.addPlatform(STS * 21, mapH - STS - 15, STS, STS, {STONE, true},
+                         map, stoneSize);
+  levelMaker.addPlatform(STS * 21.5f, mapH - STS - 10, STS, STS, {STONE, true},
+                         map, stoneSize);
+  levelMaker.addPlatform(STS * 22, mapH - STS - 5, STS, STS, {STONE, true}, map,
+                         stoneSize);
 
-    //secret passage at the top
-    levelMaker.addPlatform(STS*40, mapH-STS*10, STS*10, STS, { STONE, true}, map, stoneSize);
+  // two small walls
+  levelMaker.addPlatform(STS * 26, mapH - STS * 4, STS, STS * 3, {STONE, true},
+                         map, stoneSize);
+  levelMaker.addPlatform(STS * 30, mapH - STS * 3, STS, STS * 2, {STONE, true},
+                         map, stoneSize);
 
-    levelMaker.addPlatform(STS*45, mapH-STS-20, STS, STS, { STONE, true}, map, stoneSize);
+  // floating blocks
+  levelMaker.addPlatform(STS * 35, mapH - STS * 4, STS * 3, STS, {STONE, true},
+                         map, stoneSize);
+  levelMaker.addPlatform(STS * 36, mapH - STS * 7, STS, STS, {STONE, true}, map,
+                         stoneSize);
 
-    //ramp at the end of the level
-    levelMaker.addPlatform(mapW-STS*11, mapH-STS-10, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(mapW-STS*10, mapH-STS-20, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(mapW-STS*9, mapH-STS-30, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(mapW-STS*8, mapH-STS*2-8, STS, STS*2, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(mapW-STS*7, mapH-STS*2-18, STS, STS*2, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(mapW-STS*6, mapH-STS*2-28, STS, STS*2, { STONE, true}, map, stoneSize);
+  // secret passage at the top
+  levelMaker.addPlatform(STS * 40, mapH - STS * 10, STS * 10, STS,
+                         {STONE, true}, map, stoneSize);
 
-    levelMaker.addPlatform(mapW-STS*2, mapH-STS*2, STS, STS, { STONE, true}, map, stoneSize);
-    levelMaker.addPlatform(mapW-STS*2, mapH-STS*3, STS, STS, { FLAG, false, false, true }, map, flagSize);
+  levelMaker.addPlatform(STS * 45, mapH - STS - 20, STS, STS, {STONE, true},
+                         map, stoneSize);
 
-    //ground
-    levelMaker.addPlatform(0, mapH-STS, mapW, STS, { STONE, true}, map, stoneSize);
+  // ramp at the end of the level
+  levelMaker.addPlatform(mapW - STS * 11, mapH - STS - 10, STS, STS,
+                         {STONE, true}, map, stoneSize);
+  levelMaker.addPlatform(mapW - STS * 10, mapH - STS - 20, STS, STS,
+                         {STONE, true}, map, stoneSize);
+  levelMaker.addPlatform(mapW - STS * 9, mapH - STS - 30, STS, STS,
+                         {STONE, true}, map, stoneSize);
+  levelMaker.addPlatform(mapW - STS * 8, mapH - STS * 2 - 8, STS, STS * 2,
+                         {STONE, true}, map, stoneSize);
+  levelMaker.addPlatform(mapW - STS * 7, mapH - STS * 2 - 18, STS, STS * 2,
+                         {STONE, true}, map, stoneSize);
+  levelMaker.addPlatform(mapW - STS * 6, mapH - STS * 2 - 28, STS, STS * 2,
+                         {STONE, true}, map, stoneSize);
 
-    renderList.clear(); 
-    
-    for (int i = 0; i < map.size(); i++) {
-        for (int j = 0; j < map[0].size(); j++) {
-            if (map[i][j].isRenderOrigin) {
-                renderList.push_back({ 
-                    {(float)i, (float)j},
-                    map[i][j].type
-                });
-            }
-        }
+  levelMaker.addPlatform(mapW - STS * 2, mapH - STS * 2, STS, STS,
+                         {STONE, true}, map, stoneSize);
+  levelMaker.addPlatform(flagPos.x, flagPos.y, STS, STS,
+                         {FLAG, false, false, true}, map, flagSize);
+
+  // ground
+  levelMaker.addPlatform(0, mapH - STS, mapW, STS, {STONE, true}, map,
+                         stoneSize);
+
+  renderList.clear();
+
+  for (int i = 0; i < map.size(); i++) {
+    for (int j = 0; j < map[0].size(); j++) {
+      if (map[i][j].isRenderOrigin) {
+        renderList.push_back({{(float)i, (float)j}, map[i][j].type});
+      }
     }
+  }
 
-    enemies.push_back(Enemy({ STS*13, STS*3 }, coinEnemySprite));
-    enemies.push_back(Enemy({ STS*25, STS*3 }, coinEnemySprite));
-    enemies.push_back(Enemy({ STS*37, STS*3 }, coinEnemySprite));
-    enemies.push_back(Enemy({ STS*44, STS*3 }, coinEnemySprite));
+  enemies.push_back(Enemy({STS * 13, STS * 3}, coinEnemySprite));
+  enemies.push_back(Enemy({STS * 25, STS * 3}, coinEnemySprite));
+  enemies.push_back(Enemy({STS * 37, STS * 3}, coinEnemySprite));
+  enemies.push_back(Enemy({STS * 44, STS * 3}, coinEnemySprite));
 }
 
 void Level1::draw(float alpha, Camera2D camera) {
-    int startX = (int)(camera.target.x - (camera.offset.x / camera.zoom)) - 100;
-    int endX   = (int)(camera.target.x + ((GetScreenWidth() - camera.offset.x) / camera.zoom)) + 100;
+  int startX = (int)(camera.target.x - (camera.offset.x / camera.zoom)) - 100;
+  int endX = (int)(camera.target.x +
+                   (GetScreenWidth() - camera.offset.x) / camera.zoom) +
+             100;
 
-    if (startX < 0) startX = 0;
-    if (endX > map.size()) endX = map.size();
+  if (startX < 0)
+    startX = 0;
+  if (endX > map.size())
+    endX = map.size();
 
-    int bgStart = (startX / backgroundSprite.width) * backgroundSprite.width;
+  int bgStart = (startX / backgroundSprite.width) * backgroundSprite.width;
 
-    for (int i = bgStart; i < endX; i+= backgroundSprite.width) {
-        for (int j = 0; j < map[0].size(); j+=backgroundSprite.height) {
-            DrawTexture(backgroundSprite, i, j, WHITE);
-        }
+  for (int i = bgStart; i < endX; i += backgroundSprite.width) {
+    for (int j = 0; j < map[0].size(); j += backgroundSprite.height) {
+      DrawTexture(backgroundSprite, i, j, WHITE);
+    }
+  }
+
+  for (const auto &obj : renderList) {
+    if (obj.position.x < startX || obj.position.x > endX) {
+      continue;
     }
 
-    for (const auto& obj : renderList) {
-        if (obj.position.x < startX || obj.position.x > endX) {
-            continue; 
-        }
-
-        if (obj.type == STONE) {
-            DrawTexture(stoneBlockSprite, (int)obj.position.x, (int)obj.position.y, WHITE);
-        }
-        else if (obj.type == FLAG) {
-            DrawTexture(flagSprite, (int)obj.position.x, (int)obj.position.y, WHITE);
-        }
+    if (obj.type == STONE) {
+      DrawTexture(stoneBlockSprite, (int)obj.position.x, (int)obj.position.y,
+                  WHITE);
+    } else if (obj.type == FLAG) {
+      DrawTexture(flagSprite, (int)obj.position.x, (int)obj.position.y, WHITE);
     }
+  }
 
-    for (auto& enemy : enemies) {
-        Vector2 posNow = enemy.getPos();
-        Vector2 posOld = enemy.getOldPos();
+  for (auto &enemy : enemies) {
+    Vector2 posNow = enemy.getPos();
+    Vector2 posOld = enemy.getOldPos();
 
-        Vector2 renderPos = Vector2Lerp(posOld, posNow, alpha);
+    Vector2 renderPos = Vector2Lerp(posOld, posNow, alpha);
 
-        enemy.animate(renderPos);
-    }
+    enemy.animate(renderPos);
+  }
 }

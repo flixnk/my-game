@@ -2,46 +2,50 @@
 #define LEVELS_H
 
 #include "block.h"
+#include "enemy.h"
 #include <raylib.h>
 #include <vector>
-#include "enemy.h"
 
 struct RenderObject {
-    Vector2 position;
-    BlockType type; 
+  Vector2 position;
+  BlockType type;
 };
 
 class Level {
-    public:
-        virtual ~Level() {}
-        virtual void initLevel() = 0;
-        virtual void draw(float alpha, Camera2D camera) = 0;
+public:
+  virtual ~Level() {}
+  virtual void initLevel() = 0;
+  virtual void draw(float alpha, Camera2D camera) = 0;
 
-        void updateEnemies();
-        bool checkCollisionWithPlayer(Rectangle playerHitbox);
+  void updateEnemies();
+  bool checkCollisionWithPlayer(Rectangle playerHitbox);
+  bool checkWin(Rectangle playerHitbox);
 
-        std::vector<std::vector<Block>>& getMap() { return map; }
+  std::vector<std::vector<Block>> &getMap() { return map; }
 
-    protected:
-        Vector2 levelSize;
-        Texture2D backgroundSprite;
-        std::vector<std::vector<Block>> map;
-        std::vector<Enemy> enemies;
+protected:
+  Vector2 levelSize;
+  Texture2D backgroundSprite;
 
-        std::vector<RenderObject> renderList;
+  Texture2D flagSprite;
+  Vector2 flagPos;
+
+  std::vector<std::vector<Block>> map;
+  std::vector<Enemy> enemies;
+
+  std::vector<RenderObject> renderList;
 };
 
 class Level1 : public Level {
-    public:
-    Level1();
-    ~Level1();
-    void initLevel() override;
-    void draw(float alpha, Camera2D camera) override;
+public:
+  Level1();
+  ~Level1();
+  void initLevel() override;
+  void draw(float alpha, Camera2D camera) override;
 
-    private:
-    Texture2D stoneBlockSprite;
-    Texture2D flagSprite;
-    Texture2D coinEnemySprite;
+private:
+  Texture2D stoneBlockSprite;
+  Texture2D coinEnemySprite;
 };
 
 #endif
