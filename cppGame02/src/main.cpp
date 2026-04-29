@@ -21,6 +21,7 @@ int main() {
   MenuScreen menuScreen;
   WinScreen winScreen;
   LossScreen lossScreen;
+  OptionsScreen optionsScreen;
   GameCamera gameCam;
   UserInterface userInterface;
   Player player;
@@ -99,6 +100,8 @@ int main() {
       EndMode2D();
       userInterface.draw(player.getHp());
       break;
+    case OPTIONS:
+      optionsScreen.draw();
     }
 
     DrawFPS(GetScreenWidth() - 100, 10);

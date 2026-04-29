@@ -41,6 +41,7 @@
 *.dwo
 
 build/
+raw\ assets/
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake

@@ -32,6 +32,8 @@ void MenuScreen::draw() {
 ScreenType MenuScreen::update() {
   if (startButton->isClicked()) {
     return GAME;
+  } else if (optionsButton->isClicked()) {
+    return OPTIONS;
   }
   return MENU;
 }
@@ -50,6 +52,14 @@ LossScreen::~LossScreen() {}
 void LossScreen::draw() { ClearBackground(RED); }
 
 ScreenType LossScreen::update() {}
+
+OptionsScreen::OptionsScreen() {}
+
+OptionsScreen::~OptionsScreen() {}
+
+void OptionsScreen::draw() { ClearBackground(PURPLE); }
+
+ScreenType OptionsScreen::update() {}
 
 Button::Button(const char *fileName, float x, float y, float scale)
     : scale(scale) {

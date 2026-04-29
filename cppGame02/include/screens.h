@@ -65,4 +65,13 @@ public:
   ScreenType update() override;
 };
 
+class OptionsScreen : public Screens {
+public:
+  OptionsScreen();
+  ~OptionsScreen();
+
+  void draw() override;
+  ScreenType update() override;
+};
+
 #endif
