@@ -11,7 +11,7 @@ Player::Player() {
     TraceLog(LOG_ERROR, "Failed to load player png");
   }
 
-  position = {32, 320};
+  position = {32, 416};
   startPos = position;
   oldPosition = position;
   numFrames = 3;
