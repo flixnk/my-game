@@ -67,6 +67,7 @@ Button::Button(const char *fileName, float x, float y, float scale)
   SetTextureFilter(sprite, TEXTURE_FILTER_POINT);
   posX = x;
   posY = y;
+  isHovered = false;
 }
 Button::~Button() { UnloadTexture(sprite); }
 
@@ -80,10 +81,19 @@ void Button::draw() {
 
   bounds = {finalX, posY, scaledWidth, scaledHeight};
 
-  DrawTextureEx(sprite, {bounds.x, bounds.y}, 0.0f, scale, WHITE);
+  if (isHovered) {
+    DrawTextureEx(sprite, {bounds.x, bounds.y}, 0.0f, scale, GRAY);
+  } else {
+    DrawTextureEx(sprite, {bounds.x, bounds.y}, 0.0f, scale, WHITE);
+  }
 }
 
 bool Button::isClicked() {
+  if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
+    isHovered = true;
+  } else {
+    isHovered = false;
+  }
   return CheckCollisionPointRec(GetMousePosition(), bounds) &&
          IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 }

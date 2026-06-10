@@ -23,6 +23,7 @@ public:
 private:
   float posX;
   float posY;
+  bool isHovered;
 };
 class Screens {
 public:
