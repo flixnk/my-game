@@ -14,6 +14,8 @@ public:
   Rectangle bounds;
   float scale;
 
+  Sound clickSound;
+
   Button(const char *fileName, float x, float y, float scale);
   ~Button();
 
@@ -67,9 +69,27 @@ public:
 };
 
 class OptionsScreen : public Screens {
+  Button *backButton;
 public:
   OptionsScreen();
   ~OptionsScreen();
+
+  void draw() override;
+  ScreenType update() override;
+};
+
+class CreditsScreen : public Screens {
+  Button *backButton;
+public:
+  CreditsScreen();
+  ~CreditsScreen();
+
+  Texture2D creditsName;
+  Sound bonkSound;
+  int curX;
+  int curY;
+  int directionX;
+  int directionY;
 
   void draw() override;
   ScreenType update() override;

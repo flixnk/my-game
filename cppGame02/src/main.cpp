@@ -14,6 +14,7 @@ int main() {
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(screenSize.x, screenSize.y, "My Game02");
+  InitAudioDevice();
   MaximizeWindow();
   SetTargetFPS(144);
   ChangeDirectory(GetApplicationDirectory());
@@ -22,6 +23,7 @@ int main() {
   WinScreen winScreen;
   LossScreen lossScreen;
   OptionsScreen optionsScreen;
+  CreditsScreen creditsScreen;
   GameCamera gameCam;
   UserInterface userInterface;
   Player player;
@@ -103,12 +105,18 @@ int main() {
       userInterface.draw(player.getHp());
       break;
     case OPTIONS:
+      currentScreen = optionsScreen.update();
       optionsScreen.draw();
+      break;
+    case CREDITS:
+      currentScreen = creditsScreen.update();
+      creditsScreen.draw();
     }
 
     DrawFPS(GetScreenWidth() - 100, 10);
     EndDrawing();
   }
+  CloseAudioDevice();
   CloseWindow();
   return 0;
 }
