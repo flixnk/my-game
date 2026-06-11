@@ -48,7 +48,7 @@ int main() {
     accumulator += GetFrameTime();
     while (accumulator >= dt) {
       if (currentScreen == GAME) {
-        player.movement(map);
+        player.movement(map, dt);
         level1.updateEnemies();
       }
       if (level1.checkCollisionWithPlayer(player.getHitbox())) {

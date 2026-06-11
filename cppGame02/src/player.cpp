@@ -77,14 +77,14 @@ void Player::animate(Vector2 renderPos) {
   }
 }
 
-void Player::movement(const std::vector<std::vector<Block>> &map) {
+void Player::movement(const std::vector<std::vector<Block>> &map, float dt) {
   oldPosition = position;
   float speed = 1.75f;
   float walkingSpeed = 0.5f;
   isMoving = false;
 
   if (gotHit) {
-    hitTimer -= GetFrameTime();
+    hitTimer -= dt;
     if (hitTimer <= 0) {
       gotHit = false;
       hitTimer = 0;

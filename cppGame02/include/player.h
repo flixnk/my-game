@@ -11,7 +11,7 @@ public:
   ~Player();
 
   void animate(Vector2 renderPos);
-  void movement(const std::vector<std::vector<Block>> &map);
+  void movement(const std::vector<std::vector<Block>> &map, float dt);
   void handleInput();
   void triggerHit();
   void reset();
