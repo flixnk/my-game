@@ -1,6 +1,7 @@
 #include "screens.h"
 #include "raylib.h"
 #include "utilities.h"
+#include <string>
 
 Screens::~Screens() {}
 
@@ -61,6 +62,8 @@ OptionsScreen::OptionsScreen() {
   float scale = 5.0f;
   float rightVert = GetScreenWidth() - (float)GetScreenWidth()/3;
   backButton = new Button("back-button.png", rightVert, 100.0f, scale);
+  inputText = "";
+  FPSBoundsClicked = false;
 }
 
 OptionsScreen::~OptionsScreen() {
@@ -70,6 +73,41 @@ OptionsScreen::~OptionsScreen() {
 void OptionsScreen::draw() { 
   ClearBackground(PURPLE);
   backButton->draw();
+  Rectangle FPSBounds = { 200, 200, 102, 44 };
+
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    if (CheckCollisionPointRec(GetMousePosition(), FPSBounds)) {
+      FPSBoundsClicked = true;
+    } else {
+      FPSBoundsClicked = false;
+    }
+  }
+  
+  int key = GetCharPressed();
+
+  while (FPSBoundsClicked && key > 0) {
+    if ((key >= '0') && (key <= '9') && inputText.length() < 4) {
+      inputText += (char)key;
+    }
+    key = GetCharPressed();
+  }
+
+  if (IsKeyPressed(KEY_BACKSPACE) && !inputText.empty()) {
+    inputText.pop_back();
+  }
+
+  Color boxColor = FPSBoundsClicked ? GRAY : DARKGRAY;
+  DrawRectangleRec(FPSBounds, boxColor);
+
+  DrawText(inputText.c_str(), FPSBounds.x+5, FPSBounds.y+3, 40, LIGHTGRAY);
+
+  if (IsKeyPressed(KEY_ENTER) && !inputText.empty()) {
+    int newFPS = std::stoi(inputText);
+    if (newFPS > 0 && newFPS < 20) {
+      newFPS = 20;
+    }
+    SetTargetFPS(newFPS);
+  }
  }
 
 ScreenType OptionsScreen::update() {

@@ -3,6 +3,7 @@
 
 #include "raylib.h"
 #include "utilities.h"
+#include <string>
 
 inline const char *GetAssetPath(const char *fileName) {
   return TextFormat("../assets/%s", fileName);
@@ -76,6 +77,9 @@ public:
 
   void draw() override;
   ScreenType update() override;
+private:
+  std::string inputText;
+  bool FPSBoundsClicked;
 };
 
 class CreditsScreen : public Screens {
