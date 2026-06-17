@@ -29,13 +29,14 @@ private:
 
 class TextFieldNumbers {
 public:
-  TextFieldNumbers(float x, float y, float width, float height);
+  TextFieldNumbers(float x, float y, float width, float height, int maxSymbols);
   ~TextFieldNumbers();
 
   float x;
   float y;
   float width;
   float height;
+  int maxSymbols;
 
   int draw();
 

@@ -37,7 +37,7 @@ bool Button::isClicked() {
          IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 }
 
-TextFieldNumbers::TextFieldNumbers(float x, float y, float width, float height) : x(x), y(y), width(width), height(height) {
+TextFieldNumbers::TextFieldNumbers(float x, float y, float width, float height, int maxSymbols) : x(x), y(y), width(width), height(height), maxSymbols(maxSymbols) {
   isFPSBoundsClicked = false;
 }
 
@@ -57,7 +57,7 @@ int TextFieldNumbers::draw() {
   int key = GetCharPressed();
 
   while (isFPSBoundsClicked && key > 0) {
-    if ((key >= '0') && (key <= '9') && inputText.length() < 4) {
+    if ((key >= '0') && (key <= '9') && inputText.length() < maxSymbols) {
       inputText += (char)key;
     }
     key = GetCharPressed();
@@ -70,7 +70,7 @@ int TextFieldNumbers::draw() {
   Color boxColor = isFPSBoundsClicked ? GRAY : DARKGRAY;
   DrawRectangleRec(fpsBounds, boxColor);
 
-  DrawText(inputText.c_str(), fpsBounds.x+5, fpsBounds.y+3, 40, LIGHTGRAY);
+  DrawText(inputText.c_str(), fpsBounds.x+5, fpsBounds.y+2, fpsBounds.height-4, LIGHTGRAY);
 
   if (!inputText.empty()) {
     return std::stoi(inputText);

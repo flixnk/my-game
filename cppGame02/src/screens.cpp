@@ -59,7 +59,7 @@ ScreenType LossScreen::update() {
   return LOSS;
 }
 
-OptionsScreen::OptionsScreen() : fpsField(100, 45, 400, 30) {
+OptionsScreen::OptionsScreen() : fpsField(100, 45, 400, 30, 4) {
   float scale = 5.0f;
   float rightVert = GetScreenWidth() - (float)GetScreenWidth()/3;
   backButton = new Button("back-button.png", rightVert, 100.0f, scale);
