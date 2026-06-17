@@ -1,5 +1,6 @@
 #include "screens.h"
 #include "raylib.h"
+#include "screenElements.h"
 #include "utilities.h"
 #include <string>
 
@@ -58,12 +59,14 @@ ScreenType LossScreen::update() {
   return LOSS;
 }
 
-OptionsScreen::OptionsScreen() {
+OptionsScreen::OptionsScreen() : fpsField(100, 45, 400, 30) {
   float scale = 5.0f;
   float rightVert = GetScreenWidth() - (float)GetScreenWidth()/3;
   backButton = new Button("back-button.png", rightVert, 100.0f, scale);
-  inputText = "";
-  FPSBoundsClicked = false;
+  sliderText = "";
+  isFPSBoundsClicked = false;
+  isSliderBoundsClicked = false;
+  sliderPos = { 450, 450 };
 }
 
 OptionsScreen::~OptionsScreen() {
@@ -73,41 +76,48 @@ OptionsScreen::~OptionsScreen() {
 void OptionsScreen::draw() { 
   ClearBackground(PURPLE);
   backButton->draw();
-  Rectangle FPSBounds = { 200, 200, 102, 44 };
 
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-    if (CheckCollisionPointRec(GetMousePosition(), FPSBounds)) {
-      FPSBoundsClicked = true;
-    } else {
-      FPSBoundsClicked = false;
-    }
-  }
   
-  int key = GetCharPressed();
+  int inputText = fpsField.draw();
 
-  while (FPSBoundsClicked && key > 0) {
-    if ((key >= '0') && (key <= '9') && inputText.length() < 4) {
-      inputText += (char)key;
-    }
-    key = GetCharPressed();
-  }
-
-  if (IsKeyPressed(KEY_BACKSPACE) && !inputText.empty()) {
-    inputText.pop_back();
-  }
-
-  Color boxColor = FPSBoundsClicked ? GRAY : DARKGRAY;
-  DrawRectangleRec(FPSBounds, boxColor);
-
-  DrawText(inputText.c_str(), FPSBounds.x+5, FPSBounds.y+3, 40, LIGHTGRAY);
-
-  if (IsKeyPressed(KEY_ENTER) && !inputText.empty()) {
-    int newFPS = std::stoi(inputText);
+  if (IsKeyPressed(KEY_ENTER)) {
+    int newFPS = inputText;
     if (newFPS > 0 && newFPS < 20) {
       newFPS = 20;
     }
     SetTargetFPS(newFPS);
   }
+
+  Rectangle slider = { sliderPos.x, sliderPos.y, 20, 30 };
+  Rectangle sliderBackground = { 450, 450, 400+slider.width, 30 };
+
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    if (CheckCollisionPointRec(GetMousePosition(), sliderBackground)) {
+      isSliderBoundsClicked = true;
+    } else {
+      isSliderBoundsClicked = false;
+    }
+  }
+
+  if (isSliderBoundsClicked) {
+    sliderPos.x = GetMousePosition().x;
+    if (sliderPos.x < sliderBackground.x) {
+      sliderPos.x = sliderBackground.x;
+    } else if (sliderPos.x > sliderBackground.x + sliderBackground.width-slider.width) {
+      sliderPos.x = sliderBackground.x + sliderBackground.width-slider.width;
+    }
+  }
+
+  DrawRectangleRec(sliderBackground, GREEN);
+  DrawRectangleRec(slider, RED);
+  
+  if (IsMouseButtonUp(MOUSE_LEFT_BUTTON)) {
+    isSliderBoundsClicked = false;
+  }
+
+  int sliderNumber = (450-slider.x)/4*-1;
+  sliderText = std::to_string(sliderNumber)+'%';
+  DrawText(sliderText.c_str(), 500, 450, 30, BLACK);
  }
 
 ScreenType OptionsScreen::update() {
@@ -166,40 +176,3 @@ ScreenType CreditsScreen::update() {
   return CREDITS;
 }
 
-Button::Button(const char *fileName, float x, float y, float scale)
-    : scale(scale) {
-  sprite = LoadTexture(GetAssetPath(fileName));
-  SetTextureFilter(sprite, TEXTURE_FILTER_POINT);
-  posX = x;
-  posY = y;
-  isHovered = false;
-  clickSound = LoadSound("assets/Mouse-Click-Sound-Effect.mp3");
-}
-Button::~Button() { 
-  UnloadTexture(sprite); 
-  UnloadSound(clickSound);
-}
-
-void Button::draw() {
-  float currentCenterX = GetScreenWidth() / 2.0f;
-
-  float scaledWidth = sprite.width * scale;
-  float scaledHeight = sprite.height * scale;
-
-  float finalX = currentCenterX - (scaledWidth / 2.0f);
-
-  bounds = {finalX, posY, scaledWidth, scaledHeight};
-
-
-  isHovered = CheckCollisionPointRec(GetMousePosition(), bounds);
-
-  Color tint = isHovered ? GRAY : WHITE;
-
-  DrawTextureEx(sprite, {bounds.x, bounds.y}, 0.0f, scale, tint);
-}
-
-bool Button::isClicked() {
-  PlaySound(clickSound);
-  return CheckCollisionPointRec(GetMousePosition(), bounds) &&
-         IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
-}

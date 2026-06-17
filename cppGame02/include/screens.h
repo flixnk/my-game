@@ -4,30 +4,8 @@
 #include "raylib.h"
 #include "utilities.h"
 #include <string>
+#include "screenElements.h"
 
-inline const char *GetAssetPath(const char *fileName) {
-  return TextFormat("../assets/%s", fileName);
-}
-
-class Button {
-public:
-  Texture2D sprite;
-  Rectangle bounds;
-  float scale;
-
-  Sound clickSound;
-
-  Button(const char *fileName, float x, float y, float scale);
-  ~Button();
-
-  void draw();
-  bool isClicked();
-
-private:
-  float posX;
-  float posY;
-  bool isHovered;
-};
 class Screens {
 public:
   virtual ~Screens();
@@ -78,8 +56,11 @@ public:
   void draw() override;
   ScreenType update() override;
 private:
-  std::string inputText;
-  bool FPSBoundsClicked;
+  std::string sliderText;
+  bool isFPSBoundsClicked;
+  bool isSliderBoundsClicked;
+  Vector2 sliderPos;
+  TextFieldNumbers fpsField;
 };
 
 class CreditsScreen : public Screens {
