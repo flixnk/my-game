@@ -3,7 +3,6 @@
 
 #include "raylib.h"
 #include "utilities.h"
-#include <string>
 #include "screenElements.h"
 
 class Screens {
