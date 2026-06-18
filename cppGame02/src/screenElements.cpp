@@ -14,15 +14,7 @@ Button::~Button() {
 }
 
 void Button::draw() {
-  float currentCenterX = GetScreenWidth() / 2.0f;
-
-  float scaledWidth = sprite.width * scale;
-  float scaledHeight = sprite.height * scale;
-
-  float finalX = currentCenterX - (scaledWidth / 2.0f);
-
-  bounds = {finalX, posY, scaledWidth, scaledHeight};
-
+  bounds = {posX, posY, sprite.width*scale, sprite.height*scale};
 
   isHovered = CheckCollisionPointRec(GetMousePosition(), bounds);
 
@@ -67,14 +59,58 @@ int TextFieldNumbers::draw() {
     inputText.pop_back();
   }
 
-  Color boxColor = isFPSBoundsClicked ? GRAY : DARKGRAY;
+  Color boxColor = isFPSBoundsClicked ? LIGHTGRAY : DARKGRAY;
   DrawRectangleRec(fpsBounds, boxColor);
 
-  DrawText(inputText.c_str(), fpsBounds.x+5, fpsBounds.y+2, fpsBounds.height-4, LIGHTGRAY);
+  DrawText(inputText.c_str(), fpsBounds.x+5, fpsBounds.y+2, fpsBounds.height-4, GRAY);
 
   if (!inputText.empty()) {
     return std::stoi(inputText);
   }
 
   return -1;
+}
+
+SliderPercentage::SliderPercentage(float x, float y, float width, float height) : x(x), y(y), width(width), height(height) {
+  sliderText = "";
+  isSliderBoundsClicked = false;
+  sliderPos = { x, y };
+}
+
+SliderPercentage::~SliderPercentage() {}
+
+int SliderPercentage::draw() {
+  Rectangle slider = { sliderPos.x, sliderPos.y, width/15, height };
+  Rectangle sliderBackground = { x, y, width+slider.width, height };
+
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    if (CheckCollisionPointRec(GetMousePosition(), sliderBackground)) {
+      isSliderBoundsClicked = true;
+    } else {
+      isSliderBoundsClicked = false;
+    }
+  }
+
+  if (isSliderBoundsClicked) {
+    sliderPos.x = GetMousePosition().x;
+    if (sliderPos.x < sliderBackground.x) {
+      sliderPos.x = sliderBackground.x;
+    } else if (sliderPos.x > sliderBackground.x + sliderBackground.width-slider.width) {
+      sliderPos.x = sliderBackground.x + sliderBackground.width-slider.width;
+    }
+  }
+
+  DrawRectangleRec(sliderBackground, GREEN);
+  DrawRectangleRec(slider, RED);
+  
+  if (IsMouseButtonUp(MOUSE_LEFT_BUTTON)) {
+    isSliderBoundsClicked = false;
+  }
+
+  int sliderNumber = (sliderPos.x - x) / (sliderBackground.width - slider.width) * 100.0f;
+  
+  sliderText = std::to_string(sliderNumber)+'%';
+  DrawText(sliderText.c_str(), x+width/2, y+height/4, height/2, BLACK);
+
+  return sliderNumber;
 }

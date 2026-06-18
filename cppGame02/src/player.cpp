@@ -68,7 +68,7 @@ void Player::animate(Vector2 renderPos) {
     DrawTexturePro(spriteSheet, source, dest, {0, 0}, 0.0f, WHITE);
   }
 
-  if (IsKeyPressed(KEY_F3)) {
+  if (IsKeyPressed(KEY_F1)) {
     showDebug = !showDebug;
   }
 

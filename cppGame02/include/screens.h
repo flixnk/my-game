@@ -56,11 +56,8 @@ public:
   void draw() override;
   ScreenType update() override;
 private:
-  std::string sliderText;
-  bool isFPSBoundsClicked;
-  bool isSliderBoundsClicked;
-  Vector2 sliderPos;
   TextFieldNumbers fpsField;
+  SliderPercentage slider;
 };
 
 class CreditsScreen : public Screens {

@@ -45,4 +45,21 @@ private:
   std::string inputText;
 };
 
+class SliderPercentage {
+public:
+ SliderPercentage(float x, float y, float width, float height);
+ ~SliderPercentage();
+
+ float x;
+ float y;
+ float width;
+ float height;
+
+  int draw();
+private:
+  std::string sliderText;
+  bool isSliderBoundsClicked;
+  Vector2 sliderPos;
+};
+
 #endif

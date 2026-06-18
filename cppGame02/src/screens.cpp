@@ -59,14 +59,10 @@ ScreenType LossScreen::update() {
   return LOSS;
 }
 
-OptionsScreen::OptionsScreen() : fpsField(100, 45, 400, 30, 4) {
+OptionsScreen::OptionsScreen() : fpsField(100, 45, 532, 28, 4), slider(100, 90, 357, 86) {
   float scale = 5.0f;
   float rightVert = GetScreenWidth() - (float)GetScreenWidth()/3;
   backButton = new Button("back-button.png", rightVert, 100.0f, scale);
-  sliderText = "";
-  isFPSBoundsClicked = false;
-  isSliderBoundsClicked = false;
-  sliderPos = { 450, 450 };
 }
 
 OptionsScreen::~OptionsScreen() {
@@ -74,11 +70,12 @@ OptionsScreen::~OptionsScreen() {
 }
 
 void OptionsScreen::draw() { 
-  ClearBackground(PURPLE);
+  ClearBackground(GRAY);
   backButton->draw();
 
   
   int inputText = fpsField.draw();
+  int sliderNumber = slider.draw();
 
   if (IsKeyPressed(KEY_ENTER)) {
     int newFPS = inputText;
@@ -87,37 +84,6 @@ void OptionsScreen::draw() {
     }
     SetTargetFPS(newFPS);
   }
-
-  Rectangle slider = { sliderPos.x, sliderPos.y, 20, 30 };
-  Rectangle sliderBackground = { 450, 450, 400+slider.width, 30 };
-
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-    if (CheckCollisionPointRec(GetMousePosition(), sliderBackground)) {
-      isSliderBoundsClicked = true;
-    } else {
-      isSliderBoundsClicked = false;
-    }
-  }
-
-  if (isSliderBoundsClicked) {
-    sliderPos.x = GetMousePosition().x;
-    if (sliderPos.x < sliderBackground.x) {
-      sliderPos.x = sliderBackground.x;
-    } else if (sliderPos.x > sliderBackground.x + sliderBackground.width-slider.width) {
-      sliderPos.x = sliderBackground.x + sliderBackground.width-slider.width;
-    }
-  }
-
-  DrawRectangleRec(sliderBackground, GREEN);
-  DrawRectangleRec(slider, RED);
-  
-  if (IsMouseButtonUp(MOUSE_LEFT_BUTTON)) {
-    isSliderBoundsClicked = false;
-  }
-
-  int sliderNumber = (450-slider.x)/4*-1;
-  sliderText = std::to_string(sliderNumber)+'%';
-  DrawText(sliderText.c_str(), 500, 450, 30, BLACK);
  }
 
 ScreenType OptionsScreen::update() {
