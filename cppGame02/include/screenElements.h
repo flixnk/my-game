@@ -16,8 +16,6 @@ public:
   Rectangle bounds;
   float scale;
 
-  Sound clickSound;
-
   void draw();
   bool isClicked();
 

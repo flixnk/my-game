@@ -6,11 +6,9 @@ Button::Button(const char *fileName, float x, float y, float scale) : scale(scal
   posX = x;
   posY = y;
   isHovered = false;
-  clickSound = LoadSound("assets/Mouse-Click-Sound-Effect.mp3");
 }
 Button::~Button() { 
   UnloadTexture(sprite); 
-  UnloadSound(clickSound);
 }
 
 void Button::draw() {
@@ -24,7 +22,6 @@ void Button::draw() {
 }
 
 bool Button::isClicked() {
-  PlaySound(clickSound);
   return CheckCollisionPointRec(GetMousePosition(), bounds) &&
          IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 }

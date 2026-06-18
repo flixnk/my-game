@@ -6,7 +6,6 @@
 #include "screens.h"
 #include "userInterface.h"
 #include "utilities.h"
-#include <cmath>
 
 int main() {
   Vector2 screenSize = {600, 400};
@@ -29,6 +28,9 @@ int main() {
   Player player;
   Level1 level1;
   level1.initLevel();
+
+  Music music = LoadMusicStream("../assets/DDR.mp3");
+  PlayMusicStream(music);
 
   const std::vector<std::vector<Block>> &map = level1.getMap();
 
@@ -98,6 +100,8 @@ int main() {
       }
       break;
     case GAME:
+      UpdateMusicStream(music);
+      SetMusicVolume(music, 0.1f);
       BeginMode2D(gameCam.getRaylibCam());
       level1.draw(alpha, gameCam.getRaylibCam());
       player.animate(renderPos);
@@ -116,6 +120,7 @@ int main() {
     DrawFPS(GetScreenWidth() - 100, 10);
     EndDrawing();
   }
+  UnloadMusicStream(music);
   CloseAudioDevice();
   CloseWindow();
   return 0;
