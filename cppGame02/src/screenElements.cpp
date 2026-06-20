@@ -1,10 +1,9 @@
 #include "screenElements.h"
+#include "raylib.h"
 
-Button::Button(const char *fileName, float x, float y, float scale) : scale(scale) {
+Button::Button(const char *fileName, float x, float y, float scale) : x(x), y(y), scale(scale) {
   sprite = LoadTexture(GetAssetPath(fileName));
   SetTextureFilter(sprite, TEXTURE_FILTER_POINT);
-  posX = x;
-  posY = y;
   isHovered = false;
 }
 Button::~Button() { 
@@ -12,7 +11,7 @@ Button::~Button() {
 }
 
 void Button::draw() {
-  bounds = {posX, posY, sprite.width*scale, sprite.height*scale};
+  bounds = {x-sprite.width * scale / 2.0f, y, sprite.width*scale, sprite.height*scale};
 
   isHovered = CheckCollisionPointRec(GetMousePosition(), bounds);
 
@@ -22,8 +21,12 @@ void Button::draw() {
 }
 
 bool Button::isClicked() {
-  return CheckCollisionPointRec(GetMousePosition(), bounds) &&
-         IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+  return CheckCollisionPointRec(GetMousePosition(), bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+}
+
+void Button::setPosition(float newX, float newY) {
+  x = newX;
+  y  = newY;
 }
 
 TextFieldNumbers::TextFieldNumbers(float x, float y, float width, float height, int maxSymbols) : x(x), y(y), width(width), height(height), maxSymbols(maxSymbols) {
@@ -35,7 +38,7 @@ TextFieldNumbers::~TextFieldNumbers() {}
 int TextFieldNumbers::draw() {
   Rectangle fpsBounds = { x, y, width, height };
 
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
     if (CheckCollisionPointRec(GetMousePosition(), fpsBounds)) {
       isFPSBoundsClicked = true;
     } else {

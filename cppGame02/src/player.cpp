@@ -31,6 +31,7 @@ Player::Player() {
   gotHit = false;
   hitTimer = 0.0f;
   hp = 3;
+  coyoteTimer = 0.0f;
 }
 
 Player::~Player() { UnloadTexture(spriteSheet); }
@@ -178,9 +179,7 @@ void Player::movement(const std::vector<std::vector<Block>> &map, float dt) {
         hitSolid = true;
       }
     } else {
-      if ((isValid(position.x, nextY) && map[position.x][nextY].isSolid) ||
-          (isValid(position.x + playerSize.x - 1, nextY) &&
-           map[position.x + playerSize.x - 1][nextY].isSolid)) {
+      if ((isValid(position.x, nextY) && map[position.x][nextY].isSolid) || (isValid(position.x + playerSize.x - 1, nextY) && map[position.x + playerSize.x - 1][nextY].isSolid)) {
         hitSolid = true;
       }
     }
@@ -189,18 +188,21 @@ void Player::movement(const std::vector<std::vector<Block>> &map, float dt) {
       velocity = 0;
       if (direction > 0) {
         isGrounded = true;
+        coyoteTimer = 0.125f;
       }
       break;
     } else {
       position.y = nextY;
       isGrounded = false;
+      coyoteTimer -= GetFrameTime();
     }
   }
 }
 
 void Player::handleInput() {
-  if (IsKeyPressed(KEY_SPACE) && isGrounded) {
+  if (IsKeyPressed(KEY_SPACE) && coyoteTimer > 0.0f) {
     jumpRequest = true;
+    coyoteTimer = 0.0f;
   }
 
   moveDirection = 0;

@@ -19,9 +19,11 @@ public:
   void draw();
   bool isClicked();
 
+  void setPosition(float newX, float newY);
+
 private:
-  float posX;
-  float posY;
+  float x;
+  float y;
   bool isHovered;
 };
 
@@ -47,6 +49,23 @@ class SliderPercentage {
 public:
  SliderPercentage(float x, float y, float width, float height);
  ~SliderPercentage();
+
+ float x;
+ float y;
+ float width;
+ float height;
+
+  int draw();
+private:
+  std::string sliderText;
+  bool isSliderBoundsClicked;
+  Vector2 sliderPos;
+};
+
+class SliderWithFewerPositions {
+public:
+ SliderWithFewerPositions(float x, float y, float width, float height);
+ ~SliderWithFewerPositions();
 
  float x;
  float y;

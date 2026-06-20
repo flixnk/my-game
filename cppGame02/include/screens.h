@@ -13,6 +13,7 @@ public:
   virtual ScreenType update() = 0;
 
 protected:
+  virtual void updateLayout() = 0;
 };
 
 class MenuScreen : public Screens {
@@ -26,6 +27,9 @@ public:
 
   void draw() override;
   ScreenType update() override;
+
+private:
+  void updateLayout() override;
 };
 
 class WinScreen : public Screens {
@@ -35,6 +39,9 @@ public:
 
   void draw() override;
   ScreenType update() override;
+
+private:
+  void updateLayout() override;
 };
 
 class LossScreen : public Screens {
@@ -44,10 +51,14 @@ public:
 
   void draw() override;
   ScreenType update() override;
+
+private:
+  void updateLayout() override;
 };
 
 class OptionsScreen : public Screens {
   Button *backButton;
+  Button *screenSizeButton;
 public:
   OptionsScreen();
   ~OptionsScreen();
@@ -57,6 +68,8 @@ public:
 private:
   TextFieldNumbers fpsField;
   SliderPercentage slider;
+
+  void updateLayout() override;
 };
 
 class CreditsScreen : public Screens {
@@ -74,6 +87,9 @@ public:
 
   void draw() override;
   ScreenType update() override;
+
+private:
+  void updateLayout() override;
 };
 
 #endif

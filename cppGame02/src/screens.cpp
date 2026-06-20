@@ -6,13 +6,13 @@
 Screens::~Screens() {}
 
 MenuScreen::MenuScreen() {
-  float centerX = GetScreenWidth() / 2.0f;
-  float startY = 450.0f;
   float scale = 5.0f;
 
-  startButton = new Button("start-button.png", centerX, startY, scale);
-  optionsButton = new Button("options-button.png", centerX, startY + 125, scale);
-  creditsButton = new Button("credits-button.png", centerX, startY + 250, scale);
+  startButton = new Button("start-button.png", 0, 0, scale);
+  optionsButton = new Button("options-button.png", 0, 0, scale);
+  creditsButton = new Button("credits-button.png", 0, 0, scale);
+
+  updateLayout();
 }
 
 MenuScreen::~MenuScreen() {
@@ -29,6 +29,10 @@ void MenuScreen::draw() {
 }
 
 ScreenType MenuScreen::update() {
+  if (IsWindowResized()) {
+    updateLayout();
+  }
+
   if (startButton->isClicked()) {
     return GAME;
   } else if (optionsButton->isClicked()) {
@@ -38,6 +42,17 @@ ScreenType MenuScreen::update() {
   }
   return MENU;
 }
+
+void MenuScreen::updateLayout() {
+  int spacer = 125;
+  float centerX = GetScreenWidth() / 2.0f;
+  float startY = GetScreenHeight() - spacer*4;
+
+  startButton->setPosition(centerX, startY);
+  optionsButton->setPosition(centerX, startY + spacer);
+  creditsButton->setPosition(centerX, startY + spacer * 2);
+}
+
 WinScreen::WinScreen() {}
 
 WinScreen::~WinScreen() {}
@@ -45,8 +60,13 @@ WinScreen::~WinScreen() {}
 void WinScreen::draw() { ClearBackground(GREEN); }
 
 ScreenType WinScreen::update() {
+  if (IsKeyPressed(KEY_ENTER)) {
+    return MENU;
+  }
   return WIN;
 }
+
+void WinScreen::updateLayout() {}
 
 LossScreen::LossScreen() {}
 
@@ -55,23 +75,31 @@ LossScreen::~LossScreen() {}
 void LossScreen::draw() { ClearBackground(RED); }
 
 ScreenType LossScreen::update() {
+  if (IsKeyPressed(KEY_ENTER)) {
+    return MENU;
+  }
   return LOSS;
 }
 
+void LossScreen::updateLayout() {}
+
 OptionsScreen::OptionsScreen() : fpsField(100, 45, 532, 28, 4), slider(100, 90, 357, 86) {
   float scale = 5.0f;
-  float rightVert = GetScreenWidth() - (float)GetScreenWidth()/3;
-  backButton = new Button("back-button.png", rightVert, 100.0f, scale);
+  backButton = new Button("back-button.png", 0, 0, scale);
+  screenSizeButton = new Button("placehold-button.png", 0, 0, scale);
+
+  updateLayout();
 }
 
 OptionsScreen::~OptionsScreen() {
   delete backButton;
+  delete screenSizeButton;
 }
 
 void OptionsScreen::draw() { 
   ClearBackground(GRAY);
   backButton->draw();
-
+  screenSizeButton->draw();
   
   int inputText = fpsField.draw();
   int sliderNumber = slider.draw();
@@ -86,10 +114,28 @@ void OptionsScreen::draw() {
  }
 
 ScreenType OptionsScreen::update() {
+  if (IsWindowResized()) {
+    updateLayout();
+  }
   if (backButton->isClicked()) {
     return MENU;
   }
+  if (screenSizeButton->isClicked()) {
+    if (IsWindowMaximized()) {
+      RestoreWindow();
+    } else {
+      MaximizeWindow();
+    }
+    updateLayout();
+  }
   return OPTIONS;
+}
+
+void OptionsScreen::updateLayout() {
+  float rightVert = GetScreenWidth() - (float)GetScreenWidth()/3;
+  float leftVert = GetScreenWidth() - (float)GetScreenWidth()/3*2;
+  backButton->setPosition(rightVert, 100);
+  screenSizeButton->setPosition(leftVert, 100);
 }
 
 CreditsScreen::CreditsScreen() {
@@ -133,6 +179,8 @@ void CreditsScreen::draw() {
   curX += directionX;
   curY += directionY;
 }
+
+void CreditsScreen::updateLayout() {}
 
 ScreenType CreditsScreen::update() {
   if (backButton->isClicked()) {

@@ -46,6 +46,7 @@ private:
   bool gotHit;
   float hitTimer;
   int hp;
+  float coyoteTimer;
 };
 
 #endif

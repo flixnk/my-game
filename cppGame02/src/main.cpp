@@ -83,19 +83,20 @@ int main() {
     case MENU:
       currentScreen = menuScreen.update();
       menuScreen.draw();
-
       break;
-    case WIN:
+    case WIN:      
+      currentScreen = winScreen.update();
       winScreen.draw();
-      if (IsKeyPressed(KEY_ENTER)) {
-        currentScreen = MENU;
+
+      if (currentScreen == MENU) {
         player.reset();
       }
       break;
-    case LOSS:
+    case LOSS:      
+      currentScreen = lossScreen.update();
       lossScreen.draw();
-      if (IsKeyPressed(KEY_ENTER)) {
-        currentScreen = MENU;
+
+      if (currentScreen == MENU) {
         player.reset();
       }
       break;
