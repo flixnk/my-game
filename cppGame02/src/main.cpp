@@ -29,7 +29,7 @@ int main() {
   Level1 level1;
   level1.initLevel();
 
-  Music music = LoadMusicStream("../assets/DDR.mp3");
+  Music music = LoadMusicStream("assets/DDR.mp3");
   PlayMusicStream(music);
 
   const std::vector<std::vector<Block>> &map = level1.getMap();

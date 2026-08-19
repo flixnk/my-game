@@ -5,7 +5,7 @@
 #include <string>
 
 inline const char *GetAssetPath(const char *fileName) {
-  return TextFormat("../assets/%s", fileName);
+  return TextFormat("assets/%s", fileName);
 }
 
 class Button {
