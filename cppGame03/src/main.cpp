@@ -4,7 +4,7 @@
 
 
 int main() {
-  Vector2 screenSize = {600, 400};
+  Vector2 screenSize = {1280, 720};
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(screenSize.x, screenSize.y, "Clash Royale Clone");

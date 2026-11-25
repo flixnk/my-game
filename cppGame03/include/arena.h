@@ -10,6 +10,8 @@ constexpr float BOTTOMPATHY = VIRTUAL_HEIGHT-TOPPATHY;
 
 enum TowerType { PRINCESS = 0, KING = 1 };
 
+enum TroopType { KNIGHT = 0, MUSKETEER = 2 };
+
 class Tower {
     public:
     Tower() = default;
@@ -32,8 +34,8 @@ class Arena;
 class Troop {
     public:
     Troop() = default;
-    Troop(Vector2 position, Color color);
-    ~Troop();
+    Troop(Vector2 position, Color color, TroopType troopType);
+    ~Troop() = default;
     void draw();
     void move(const std::vector<Rectangle>& towerRecs);
     Rectangle hitbox;
@@ -44,6 +46,10 @@ class Troop {
     Color team;
     float speed;
     float troopSize;
+    float attackRange;
+    float sightRange;
+    Texture2D sprite;
+    TroopType type;
 };
 
 class Arena {
