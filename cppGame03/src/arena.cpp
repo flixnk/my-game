@@ -2,29 +2,34 @@
 #include "raylib.h"
 #include <vector>
 
-Tower::Tower(Vector2 position, Vector2 dimensions, Color color, TowerType towerType) {
+Tower::Tower(Vector2 position, float dimensions, Color color, TowerType towerType) {
     pos = position;
     team = color;
     type = towerType;
     size = dimensions;
-    hitbox = { pos.x-size.x/2, pos.y-size.y/2, size.x, size.y };
 }
 
 Tower::~Tower() {}
 
 void Tower::draw() {
+    Rectangle hitbox = getHitbox();
     DrawRectangleRec(hitbox, team);
+}
+
+Rectangle Tower::getHitbox() const {
+    Rectangle hitbox = { pos.x-size/2, pos.y-size/2, size, size };
+    return hitbox;
 }
 
 Arena::Arena() {
     arena = LoadTexture("../assets/arena.png");
 
-    kingTowerBlue = Tower({ VIRTUAL_WIDTH/9, VIRTUAL_HEIGHT/2 }, { VIRTUAL_WIDTH/18, VIRTUAL_WIDTH/18 }, DARKBLUE, KING);
-    kingTowerRed = Tower({ VIRTUAL_WIDTH/9*8, VIRTUAL_HEIGHT/2 }, { VIRTUAL_WIDTH/18, VIRTUAL_WIDTH/18 }, RED, KING);
-    princessTowerBlueTop = Tower({ VIRTUAL_WIDTH/9*2,TOPPATHY }, { VIRTUAL_WIDTH/30, VIRTUAL_WIDTH/30 }, DARKBLUE, PRINCESS);
-    princessTowerBlueBottom = Tower({ VIRTUAL_WIDTH/9*2,BOTTOMPATHY }, { VIRTUAL_WIDTH/30, VIRTUAL_WIDTH/30 }, DARKBLUE, PRINCESS);
-    princessTowerRedTop = Tower({ VIRTUAL_WIDTH/9*7,TOPPATHY }, { VIRTUAL_WIDTH/30, VIRTUAL_WIDTH/30 }, RED, PRINCESS);
-    princessTowerRedBottom = Tower({ VIRTUAL_WIDTH/9*7,BOTTOMPATHY }, { VIRTUAL_WIDTH/30, VIRTUAL_WIDTH/30 }, RED, PRINCESS);
+    kingTowerBlue = Tower({ VIRTUAL_WIDTH/9, VIRTUAL_HEIGHT/2 }, VIRTUAL_WIDTH/18, DARKBLUE, KING);
+    kingTowerRed = Tower({ VIRTUAL_WIDTH/9*8, VIRTUAL_HEIGHT/2 }, VIRTUAL_WIDTH/18, RED, KING);
+    princessTowerBlueTop = Tower({ VIRTUAL_WIDTH/9*2,TOPPATHY }, VIRTUAL_WIDTH/30, DARKBLUE, PRINCESS);
+    princessTowerBlueBottom = Tower({ VIRTUAL_WIDTH/9*2,BOTTOMPATHY }, VIRTUAL_WIDTH/30, DARKBLUE, PRINCESS);
+    princessTowerRedTop = Tower({ VIRTUAL_WIDTH/9*7,TOPPATHY }, VIRTUAL_WIDTH/30, RED, PRINCESS);
+    princessTowerRedBottom = Tower({ VIRTUAL_WIDTH/9*7,BOTTOMPATHY }, VIRTUAL_WIDTH/30, RED, PRINCESS);
 
     isMiddleDrawn = false;
 
@@ -64,7 +69,7 @@ void Arena::draw() {
     }
 
     for (auto& troop : troops) {
-        troop.move(getTowerRecs());
+        troop.move(getTowerRecs(), troops);
         troop.draw();
     }
     
@@ -82,16 +87,27 @@ std::vector<Rectangle> Arena::getTowerRecs() const {
     std::vector<Rectangle> towerRecs;
     
     for (auto& tower : towers) {
-        towerRecs.push_back(tower.hitbox);
+        towerRecs.push_back(tower.getHitbox());
     }
 
     return towerRecs;
+}
+
+std::vector<Rectangle> Arena::getTroopRecs() const {
+    std::vector<Rectangle> troopRecs;
+    
+    for (auto& troop : troops) {
+        troopRecs.push_back(troop.getHitbox());
+    }
+
+    return troopRecs;
 }
 
 Troop::Troop(Vector2 position, Color color, TroopType troopType) {
     pos = position;
     team = color;
     type = troopType;
+    isEnemyInRange = false;
 
     switch (type) {
         case KNIGHT:
@@ -99,7 +115,7 @@ Troop::Troop(Vector2 position, Color color, TroopType troopType) {
         attackRange = 20.0f;
         sightRange = 400.0f;
         speed = 1.0f;
-        troopSize = 60.0f;
+        size = 50.0f;
         sprite = LoadTexture("../assets/knight.png");
         break;
 
@@ -108,14 +124,17 @@ Troop::Troop(Vector2 position, Color color, TroopType troopType) {
         attackRange = 200.0f;
         sightRange = 400.0f;
         speed = 1.0f;
-        troopSize = 40.0f;
+        size = 40.0f;
         sprite = LoadTexture("../assets/musketeer.png");
         break;
     }
+
 }
 
-void Troop::move(const std::vector<Rectangle>& towerRecs) {
-    Rectangle troop = { pos.x-troopSize/2, pos.y-troopSize/2, troopSize, troopSize };
+void Troop::move(const std::vector<Rectangle>& towerRecs, const std::vector<Troop>& troops) {
+    Rectangle hitbox = getHitbox();
+
+    isEnemyInRange = false;
 
     bool blockedToRight = false;
     bool blockedToLeft = false;
@@ -132,47 +151,67 @@ void Troop::move(const std::vector<Rectangle>& towerRecs) {
     obstacles.push_back(riverTop);
 
     for (auto& obstacle : obstacles) {
-        if (CheckCollisionRecs({troop.x+speed, troop.y, troop.width, troop.height}, obstacle)) {
+        if (CheckCollisionRecs({hitbox.x+speed, hitbox.y, hitbox.width, hitbox.height}, obstacle)) {
             blockedToRight = true;
         }
-        if (CheckCollisionRecs({troop.x-speed, troop.y, troop.width, troop.height}, obstacle)) {
+        if (CheckCollisionRecs({hitbox.x-speed, hitbox.y, hitbox.width, hitbox.height}, obstacle)) {
             blockedToLeft = true;
         }
-        if (CheckCollisionRecs({troop.x, troop.y+speed, troop.width, troop.height}, obstacle)) {
+        if (CheckCollisionRecs({hitbox.x, hitbox.y+speed, hitbox.width, hitbox.height}, obstacle)) {
             blockedBelow = true;
         }
-        if (CheckCollisionRecs({troop.x, troop.y-speed, troop.width, troop.height}, obstacle)) {
+        if (CheckCollisionRecs({hitbox.x, hitbox.y-speed, hitbox.width, hitbox.height}, obstacle)) {
             blockedAbove = true;
         }
     }
 
-    float distanceToTopPath = abs(pos.y-TOPPATHY);
-    float distanceToBottomPath = abs(pos.y-BOTTOMPATHY);
-
-    if (pos.y > VIRTUAL_HEIGHT/2.0f) {
-        if (pos.y < BOTTOMPATHY && not blockedBelow && distanceToBottomPath > speed) {
-            pos.y += speed;
-        } else if (not blockedAbove && distanceToBottomPath > speed) {
-            pos.y -= speed;
+    for (const auto& troop : troops) {
+        if (&troop == this || ColorIsEqual(team, troop.getTeam())) {
+            continue;
         }
-        
-    } else {
-        if (pos.y < TOPPATHY && not blockedBelow && distanceToTopPath > speed) {
-            pos.y += speed;
-        } else if (not blockedAbove && distanceToTopPath > speed) {
-            pos.y -= speed;
+
+        if (CheckCollisionCircleRec(pos, sightRange/2.0f, troop.getHitbox())) {
+            isEnemyInRange = true;
         }
     }
     
-    if (ColorIsEqual(team, DARKBLUE) && not blockedToRight) {
-        pos.x += speed;
-    } else if (ColorIsEqual(team, RED) && not blockedToLeft) {
-        pos.x -= speed;
+
+    if (isEnemyInRange) {
+
+    }else {
+        float distanceToTopPath = abs(pos.y-TOPPATHY);
+        float distanceToBottomPath = abs(pos.y-BOTTOMPATHY);
+
+        if (pos.y > VIRTUAL_HEIGHT/2.0f) {
+            if (pos.y < BOTTOMPATHY && not blockedBelow && distanceToBottomPath > speed) {
+                pos.y += speed;
+            } else if (not blockedAbove && distanceToBottomPath > speed) {
+                pos.y -= speed;
+            }
+            
+        } else {
+            if (pos.y < TOPPATHY && not blockedBelow && distanceToTopPath > speed) {
+                pos.y += speed;
+            } else if (not blockedAbove && distanceToTopPath > speed) {
+                pos.y -= speed;
+            }
+        }
+        
+        if (ColorIsEqual(team, DARKBLUE) && not blockedToRight) {
+            pos.x += speed;
+        } else if (ColorIsEqual(team, RED) && not blockedToLeft) {
+            pos.x -= speed;
+        }
     }
+}
+
+Rectangle Troop::getHitbox() const {
+    Rectangle hitbox = { pos.x-size/2, pos.y-size/2, size, size };
+    return hitbox;
 }
 
 void Troop::draw() {
     Rectangle source = { 0, 0, float(sprite.width), float(sprite.height) };
-    Rectangle dest = { roundf(pos.x-troopSize/2), roundf(pos.y-troopSize/2), troopSize, troopSize };
+    Rectangle dest = { roundf(pos.x-size/2), roundf(pos.y-size/2), size, size };
     DrawTexturePro(sprite, source, dest, {0,0}, 0.0f, team);
 }

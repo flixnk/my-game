@@ -15,18 +15,17 @@ enum TroopType { KNIGHT = 0, MUSKETEER = 2 };
 class Tower {
     public:
     Tower() = default;
-    Tower(Vector2 position, Vector2 dimensions, Color color, TowerType towerType);
+    Tower(Vector2 position, float dimensions, Color color, TowerType towerType);
     ~Tower();
-    Rectangle hitbox;
     void draw();
+    Rectangle getHitbox() const;
 
     private:
     Vector2 pos;
     int health;
     Color team;
     TowerType type;
-    Vector2 size;
-    
+    float size;
 };
 
 class Arena;
@@ -37,19 +36,21 @@ class Troop {
     Troop(Vector2 position, Color color, TroopType troopType);
     ~Troop() = default;
     void draw();
-    void move(const std::vector<Rectangle>& towerRecs);
-    Rectangle hitbox;
+    void move(const std::vector<Rectangle>& towerRecs, const std::vector<Troop>& troops);
+    Rectangle getHitbox() const;
+    Color getTeam() const { return team; }
 
     private:
     Vector2 pos;
     int health;
     Color team;
     float speed;
-    float troopSize;
+    float size;
     float attackRange;
     float sightRange;
     Texture2D sprite;
     TroopType type;
+    bool isEnemyInRange;
 };
 
 class Arena {
@@ -58,6 +59,7 @@ class Arena {
     ~Arena();
     void draw();
     std::vector<Rectangle> getTowerRecs() const;
+    std::vector<Rectangle> getTroopRecs() const;
 
     private:
     Texture2D arena;
