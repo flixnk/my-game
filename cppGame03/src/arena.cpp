@@ -1,63 +1,27 @@
 #include "arena.h"
 #include "raylib.h"
+#include <type_traits>
 #include <vector>
 #include "raymath.h"
-
-Tower::Tower(Vector2 position, Color color, TowerType towerType) {
-    pos = position;
-    team = color;
-    type = towerType;
-    health = maxHealth;
-
-    switch (type) {
-        case (KING):
-        size = 100.0f;
-        break;
-
-        case (PRINCESS):
-        size = 60.0f;
-        break;
-    }
-}
-
-Tower::~Tower() {}
-
-void Tower::draw() {
-    float healthBarWidth = 80.0f;
-    Rectangle healthbarRed = { pos.x - healthBarWidth/2.0f, pos.y-50.0f, healthBarWidth, 10.0f };
-    DrawRectangleRec(healthbarRed, RED);
-
-    float healthRemainingPercent = health/maxHealth;
-    Rectangle healthBarGreen = { healthbarRed.x, healthbarRed.y, healthbarRed.width*healthRemainingPercent, healthbarRed.height };
-    DrawRectangleRec(healthBarGreen, GREEN);
-
-    Rectangle hitbox = getHitbox();
-    DrawRectangleRec(hitbox, team);
-}
-
-Rectangle Tower::getHitbox() const {
-    Rectangle hitbox = { pos.x-size/2, pos.y-size/2, size, size };
-    return hitbox;
-}
 
 Arena::Arena() {
     arena = LoadTexture("../assets/arena.png");
 
-    kingTowerBlue = Tower({ VIRTUAL_WIDTH/9, VIRTUAL_HEIGHT/2 }, DARKBLUE, KING);
-    kingTowerRed = Tower({ VIRTUAL_WIDTH/9*8, VIRTUAL_HEIGHT/2 }, RED, KING);
-    princessTowerBlueTop = Tower({ VIRTUAL_WIDTH/9*2,TOPPATHY }, DARKBLUE, PRINCESS);
-    princessTowerBlueBottom = Tower({ VIRTUAL_WIDTH/9*2,BOTTOMPATHY }, DARKBLUE, PRINCESS);
-    princessTowerRedTop = Tower({ VIRTUAL_WIDTH/9*7,TOPPATHY }, RED, PRINCESS);
-    princessTowerRedBottom = Tower({ VIRTUAL_WIDTH/9*7,BOTTOMPATHY }, RED, PRINCESS);
+    kingTowerBlue = Troop({ VIRTUAL_WIDTH/9, VIRTUAL_HEIGHT/2 }, DARKBLUE, KING_TOWER);
+    kingTowerRed = Troop({ VIRTUAL_WIDTH/9*8, VIRTUAL_HEIGHT/2 }, RED, KING_TOWER);
+    princessTowerBlueTop = Troop({ VIRTUAL_WIDTH/9*2,TOPPATHY }, DARKBLUE, PRINCESS_TOWER);
+    princessTowerBlueBottom = Troop({ VIRTUAL_WIDTH/9*2,BOTTOMPATHY }, DARKBLUE, PRINCESS_TOWER);
+    princessTowerRedTop = Troop({ VIRTUAL_WIDTH/9*7,TOPPATHY }, RED, PRINCESS_TOWER);
+    princessTowerRedBottom = Troop({ VIRTUAL_WIDTH/9*7,BOTTOMPATHY }, RED, PRINCESS_TOWER);
 
     isMiddleDrawn = false;
 
-    towers.push_back(kingTowerBlue);
-    towers.push_back(kingTowerRed);
-    towers.push_back(princessTowerBlueTop);
-    towers.push_back(princessTowerBlueBottom);
-    towers.push_back(princessTowerRedTop);
-    towers.push_back(princessTowerRedBottom);
+    troops.push_back(kingTowerBlue);
+    troops.push_back(kingTowerRed);
+    troops.push_back(princessTowerBlueTop);
+    troops.push_back(princessTowerBlueBottom);
+    troops.push_back(princessTowerRedTop);
+    troops.push_back(princessTowerRedBottom);
 }
 
 Arena::~Arena() {
@@ -85,16 +49,6 @@ void Arena::draw() {
         DrawRectangle(VIRTUAL_WIDTH/2, 0, 5, VIRTUAL_HEIGHT, GREEN);
         DrawRectangle(0, VIRTUAL_HEIGHT/2, VIRTUAL_WIDTH, 5, GREEN);
     }
-}
-
-std::vector<Rectangle> Arena::getTowerRecs() const {
-    std::vector<Rectangle> towerRecs;
-    
-    for (auto& tower : towers) {
-        towerRecs.push_back(tower.getHitbox());
-    }
-
-    return towerRecs;
 }
 
 std::vector<Rectangle> Arena::getTroopRecs() const {
@@ -125,7 +79,7 @@ void Arena::update(float dt) {
 
     //Iterate through all troops and update them
     for (auto& troop : troops) {
-        troop.update(dt, getTowerRecs(), troops);
+        troop.update(dt, troops);
     }
 
     troops.erase(
@@ -146,6 +100,29 @@ Troop::Troop(Vector2 position, Color color, TroopType troopType) {
     animTimer = 0.0f;
 
     switch (type) {
+        case PRINCESS_TOWER:
+        maxHealth = 6000.0f;
+        health = maxHealth;
+        attackDamage = 1.0f;
+        attackRange = 650.0f;
+        sightRange = attackRange;
+        speed = 0.0f;
+        size = 70.0f;
+        sprite = LoadTexture("../assets/princessTower.png");
+        numFrames = 3;
+
+        break;
+        case KING_TOWER:
+        maxHealth = 9000.0f;
+        health = maxHealth;
+        attackDamage = 1.0f;
+        attackRange = 650.0f;
+        sightRange = attackRange;
+        speed = 0.0f;
+        size = 100.0f;
+        sprite = LoadTexture("../assets/princessTower.png");
+        numFrames = 3;
+        break;
         case KNIGHT:
         maxHealth = 600.0f;
         health = maxHealth;
@@ -161,7 +138,7 @@ Troop::Troop(Vector2 position, Color color, TroopType troopType) {
         case MUSKETEER:
         maxHealth = 300.0f;
         health = maxHealth;
-        attackDamage = 5.0f;
+        attackDamage = 2.0f;
         attackRange = 200.0f;
         sightRange = 600.0f;
         speed = 150.0f;
@@ -172,7 +149,7 @@ Troop::Troop(Vector2 position, Color color, TroopType troopType) {
     }
 }
 
-void Troop::update(float dt, const std::vector<Rectangle>& towerRecs, std::vector<Troop>& troops) {
+void Troop::update(float dt, std::vector<Troop>& troops) {
     float step = speed * dt;
 
     Rectangle hitbox = getHitbox();
@@ -189,7 +166,15 @@ void Troop::update(float dt, const std::vector<Rectangle>& towerRecs, std::vecto
     Rectangle riverTop = { VIRTUAL_WIDTH/2.0f-50, 60.0f, 100, 133 };
     Rectangle riverBottom = { VIRTUAL_WIDTH/2.0f-50, VIRTUAL_HEIGHT-60.0f-133, 100, 133 };
     
-    std::vector<Rectangle> obstacles = towerRecs;
+    std::vector<Rectangle> obstacles;
+
+    for (auto& troop : troops) {
+        if (&troop ==this) {
+            continue;
+        }
+        obstacles.push_back(troop.getHitbox());
+    }
+
     obstacles.push_back(riverMiddle);
     obstacles.push_back(riverBottom);
     obstacles.push_back(riverTop);
@@ -210,22 +195,20 @@ void Troop::update(float dt, const std::vector<Rectangle>& towerRecs, std::vecto
     }
 
     Troop* closestEnemy = nullptr;
-    bool foundEnemy = false;
 
     for (auto& troop : troops) {
         if (&troop == this || ColorIsEqual(team, troop.getTeam())) {
             continue;
         }
 
-        if (CheckCollisionCircleRec(pos, sightRange/2.0f, troop.getHitbox())) {
+        if (CheckCollisionCircleRec(pos, sightRange, troop.getHitbox())) {
             isEnemyInRange = true;
 
-            if (!foundEnemy || getDistanceToTroop(troop)<getDistanceToTroop(*closestEnemy)) {
+            if (closestEnemy == nullptr || getDistanceToTroop(troop)<getDistanceToTroop(*closestEnemy)) {
                 closestEnemy = &troop;
-                foundEnemy = true;
             }
 
-            if (CheckCollisionCircleRec(pos, attackRange/2.0f, troop.getHitbox())) {
+            if (CheckCollisionCircleRec(pos, attackRange, troop.getHitbox())) {
                 isAttacking = true;
             }
         }
@@ -296,7 +279,7 @@ Rectangle Troop::getHitbox() const {
 
 void Troop::draw() {
     float healthBarWidth = 80.0f;
-    Rectangle healthbarRed = { pos.x - healthBarWidth/2.0f, pos.y-50.0f, healthBarWidth, 10.0f };
+    Rectangle healthbarRed = { pos.x - healthBarWidth/2.0f, pos.y-size*0.8f, healthBarWidth, 10.0f };
     DrawRectangleRec(healthbarRed, RED);
 
     float healthRemainingPercent = health/maxHealth;

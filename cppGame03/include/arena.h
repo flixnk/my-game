@@ -8,27 +8,7 @@ constexpr float VIRTUAL_HEIGHT = 1440.0f;
 constexpr float TOPPATHY = 226.0f;
 constexpr float BOTTOMPATHY = VIRTUAL_HEIGHT-TOPPATHY;
 
-enum TowerType { PRINCESS = 0, KING = 1 };
-
-enum TroopType { KNIGHT = 0, MUSKETEER = 2 };
-
-class Tower {
-    public:
-    Tower() = default;
-    Tower(Vector2 position, Color color, TowerType towerType);
-    ~Tower();
-    void draw();
-    Rectangle getHitbox() const;
-    void takeDamage(float damage) { health -= damage; }
-
-    private:
-    Vector2 pos;
-    float maxHealth;
-    float health;
-    Color team;
-    TowerType type;
-    float size;
-};
+enum TroopType { PRINCESS_TOWER = 0, KING_TOWER = 1, KNIGHT = 2, MUSKETEER = 3 };
 
 class Arena;
 
@@ -38,7 +18,7 @@ class Troop {
     Troop(Vector2 position, Color color, TroopType troopType);
     ~Troop() = default;
     void draw();
-    void update(float dt, const std::vector<Rectangle>& towerRecs, std::vector<Troop>& troops);
+    void update(float dt, std::vector<Troop>& troops);
     Rectangle getHitbox() const;
     Color getTeam() const { return team; }
     float getHealth() const { return health; }
@@ -70,21 +50,19 @@ class Arena {
     Arena();
     ~Arena();
     void draw();
-    std::vector<Rectangle> getTowerRecs() const;
     std::vector<Rectangle> getTroopRecs() const;
     void update(float dt);
 
     private:
     Texture2D arena;
-    Tower kingTowerBlue;
-    Tower kingTowerRed;
-    Tower princessTowerBlueTop;
-    Tower princessTowerBlueBottom;
-    Tower princessTowerRedTop;
-    Tower princessTowerRedBottom;
+    Troop kingTowerBlue;
+    Troop kingTowerRed;
+    Troop princessTowerBlueTop;
+    Troop princessTowerBlueBottom;
+    Troop princessTowerRedTop;
+    Troop princessTowerRedBottom;
     std::vector<Troop> troops;
     bool isMiddleDrawn;
-    std::vector<Tower> towers;
 };
 
 #endif
