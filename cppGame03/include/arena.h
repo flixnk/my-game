@@ -15,14 +15,16 @@ enum TroopType { KNIGHT = 0, MUSKETEER = 2 };
 class Tower {
     public:
     Tower() = default;
-    Tower(Vector2 position, float dimensions, Color color, TowerType towerType);
+    Tower(Vector2 position, Color color, TowerType towerType);
     ~Tower();
     void draw();
     Rectangle getHitbox() const;
+    void takeDamage(float damage) { health -= damage; }
 
     private:
     Vector2 pos;
-    int health;
+    float maxHealth;
+    float health;
     Color team;
     TowerType type;
     float size;
@@ -36,14 +38,18 @@ class Troop {
     Troop(Vector2 position, Color color, TroopType troopType);
     ~Troop() = default;
     void draw();
-    void move(const std::vector<Rectangle>& towerRecs, const std::vector<Troop>& troops);
+    void update(float dt, const std::vector<Rectangle>& towerRecs, std::vector<Troop>& troops);
     Rectangle getHitbox() const;
     Color getTeam() const { return team; }
+    float getHealth() const { return health; }
     float getDistanceToTroop(Troop otherTroop) const;
+    bool isDead() const { return health <= 0.0f; }
+    void takeDamage(float damage) { health -= damage; }
 
     private:
     Vector2 pos;
-    int health;
+    float maxHealth;
+    float health;
     Color team;
     float speed;
     float size;
@@ -53,6 +59,10 @@ class Troop {
     TroopType type;
     bool isEnemyInRange;
     bool isAttacking;
+    int currentFrame;
+    float animTimer;
+    int numFrames;
+    float attackDamage;
 };
 
 class Arena {
@@ -62,6 +72,7 @@ class Arena {
     void draw();
     std::vector<Rectangle> getTowerRecs() const;
     std::vector<Rectangle> getTroopRecs() const;
+    void update(float dt);
 
     private:
     Texture2D arena;

@@ -17,6 +17,10 @@ int main() {
   Arena arena;
 
   while (!WindowShouldClose()) {
+    float dt = std::min(GetFrameTime(), 0.05f);
+
+    arena.update(dt);
+
     BeginTextureMode(target);
       ClearBackground(LIGHTGRAY);
       arena.draw();
