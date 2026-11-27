@@ -1,6 +1,7 @@
 #include "arena.h"
 #include "raylib.h"
 #include <vector>
+#include "raymath.h"
 
 Tower::Tower(Vector2 position, float dimensions, Color color, TowerType towerType) {
     pos = position;
@@ -108,6 +109,7 @@ Troop::Troop(Vector2 position, Color color, TroopType troopType) {
     team = color;
     type = troopType;
     isEnemyInRange = false;
+    isAttacking = false;
 
     switch (type) {
         case KNIGHT:
@@ -135,6 +137,7 @@ void Troop::move(const std::vector<Rectangle>& towerRecs, const std::vector<Troo
     Rectangle hitbox = getHitbox();
 
     isEnemyInRange = false;
+    isAttacking = false;
 
     bool blockedToRight = false;
     bool blockedToLeft = false;
@@ -165,6 +168,9 @@ void Troop::move(const std::vector<Rectangle>& towerRecs, const std::vector<Troo
         }
     }
 
+    Troop closestEnemy;
+    bool foundEnemy = false;
+
     for (const auto& troop : troops) {
         if (&troop == this || ColorIsEqual(team, troop.getTeam())) {
             continue;
@@ -172,12 +178,32 @@ void Troop::move(const std::vector<Rectangle>& towerRecs, const std::vector<Troo
 
         if (CheckCollisionCircleRec(pos, sightRange/2.0f, troop.getHitbox())) {
             isEnemyInRange = true;
+
+            if (!foundEnemy || getDistanceToTroop(troop)<getDistanceToTroop(closestEnemy)) {
+                closestEnemy = troop;
+                foundEnemy = true;
+            }
+
+            if (CheckCollisionCircleRec(pos, attackRange/2.0f, troop.getHitbox())) {
+                isAttacking = true;
+            }
         }
     }
     
+    if (isAttacking) {
+    }  else if (isEnemyInRange) {
+        Vector2 directionToEnemy = { pos.x-closestEnemy.pos.x, pos.y-closestEnemy.pos.y };
 
-    if (isEnemyInRange) {
-
+        if (directionToEnemy.x < 0 && abs(directionToEnemy.x) > speed && !blockedToRight) {
+            pos.x += 1;
+        } else if (directionToEnemy.x > 0 && abs(directionToEnemy.x) > speed && !blockedToLeft) {
+            pos.x -= 1;
+        }
+        if (directionToEnemy.y < 0 && abs(directionToEnemy.y) > speed && !blockedBelow) {
+            pos.y += 1;
+        } else if (directionToEnemy.y > 0 && abs(directionToEnemy.y) > speed && !blockedAbove) {
+            pos.y -= 1;
+        }
     }else {
         float distanceToTopPath = abs(pos.y-TOPPATHY);
         float distanceToBottomPath = abs(pos.y-BOTTOMPATHY);
@@ -214,4 +240,8 @@ void Troop::draw() {
     Rectangle source = { 0, 0, float(sprite.width), float(sprite.height) };
     Rectangle dest = { roundf(pos.x-size/2), roundf(pos.y-size/2), size, size };
     DrawTexturePro(sprite, source, dest, {0,0}, 0.0f, team);
+}
+
+float Troop::getDistanceToTroop(Troop otherTroop) const {
+    return Vector2Distance(pos, otherTroop.pos);
 }

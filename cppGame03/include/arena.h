@@ -39,6 +39,7 @@ class Troop {
     void move(const std::vector<Rectangle>& towerRecs, const std::vector<Troop>& troops);
     Rectangle getHitbox() const;
     Color getTeam() const { return team; }
+    float getDistanceToTroop(Troop otherTroop) const;
 
     private:
     Vector2 pos;
@@ -51,6 +52,7 @@ class Troop {
     Texture2D sprite;
     TroopType type;
     bool isEnemyInRange;
+    bool isAttacking;
 };
 
 class Arena {
