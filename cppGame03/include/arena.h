@@ -2,11 +2,15 @@
 #define ARENA_H
 #include "raylib.h"
 #include <vector>
+#include "hud.h"
 
 constexpr float VIRTUAL_WIDTH = 2560.0f;
 constexpr float VIRTUAL_HEIGHT = 1440.0f;
 constexpr float TOPPATHY = 226.0f;
 constexpr float BOTTOMPATHY = VIRTUAL_HEIGHT-TOPPATHY;
+constexpr Rectangle RIVER_MIDDLE = { VIRTUAL_WIDTH/2.0f-50, 260.0f, 100, VIRTUAL_HEIGHT-520 };
+constexpr Rectangle RIVER_TOP = { VIRTUAL_WIDTH/2.0f-50, 60.0f, 100, 133 };
+constexpr Rectangle RIVER_BOTTOM = { VIRTUAL_WIDTH/2.0f-50, VIRTUAL_HEIGHT-60.0f-133, 100, 133 };
 
 enum TroopType { PRINCESS_TOWER = 0, KING_TOWER = 1, KNIGHT = 2, MUSKETEER = 3 };
 
@@ -25,6 +29,8 @@ class Troop {
     float getDistanceToTroop(Troop otherTroop) const;
     bool isDead() const { return health <= 0.0f; }
     void takeDamage(float damage) { health -= damage; }
+    bool isRiverBetween(Troop otherTroop);
+    Vector2 getPosition() const { return pos; }
 
     private:
     Vector2 pos;

@@ -1,8 +1,8 @@
 #include "arena.h"
 #include "raylib.h"
-#include <type_traits>
 #include <vector>
 #include "raymath.h"
+#include "utils.h"
 
 Arena::Arena() {
     arena = LoadTexture("../assets/arena.png");
@@ -49,6 +49,9 @@ void Arena::draw() {
         DrawRectangle(VIRTUAL_WIDTH/2, 0, 5, VIRTUAL_HEIGHT, GREEN);
         DrawRectangle(0, VIRTUAL_HEIGHT/2, VIRTUAL_WIDTH, 5, GREEN);
     }
+
+    Hud hud;
+    hud.draw();
 }
 
 std::vector<Rectangle> Arena::getTroopRecs() const {
@@ -101,21 +104,21 @@ Troop::Troop(Vector2 position, Color color, TroopType troopType) {
 
     switch (type) {
         case PRINCESS_TOWER:
-        maxHealth = 6000.0f;
+        maxHealth = 2000.0f;
         health = maxHealth;
-        attackDamage = 1.0f;
+        attackDamage = 60.0f;
         attackRange = 650.0f;
         sightRange = attackRange;
         speed = 0.0f;
         size = 70.0f;
         sprite = LoadTexture("../assets/princessTower.png");
         numFrames = 3;
-
         break;
+
         case KING_TOWER:
-        maxHealth = 9000.0f;
+        maxHealth = 4000.0f;
         health = maxHealth;
-        attackDamage = 1.0f;
+        attackDamage = 60.0f;
         attackRange = 650.0f;
         sightRange = attackRange;
         speed = 0.0f;
@@ -123,10 +126,11 @@ Troop::Troop(Vector2 position, Color color, TroopType troopType) {
         sprite = LoadTexture("../assets/princessTower.png");
         numFrames = 3;
         break;
+
         case KNIGHT:
         maxHealth = 600.0f;
         health = maxHealth;
-        attackDamage = 30.0f;
+        attackDamage = 300.0f;
         attackRange = 40.0f;
         sightRange = 600.0f;
         speed = 150.0f;
@@ -138,7 +142,7 @@ Troop::Troop(Vector2 position, Color color, TroopType troopType) {
         case MUSKETEER:
         maxHealth = 300.0f;
         health = maxHealth;
-        attackDamage = 2.0f;
+        attackDamage = 100.0f;
         attackRange = 200.0f;
         sightRange = 600.0f;
         speed = 150.0f;
@@ -161,23 +165,19 @@ void Troop::update(float dt, std::vector<Troop>& troops) {
     bool blockedToLeft = false;
     bool blockedAbove = false;
     bool blockedBelow = false;
-
-    Rectangle riverMiddle = { VIRTUAL_WIDTH/2.0f-50, 260.0f, 100, VIRTUAL_HEIGHT-520 };
-    Rectangle riverTop = { VIRTUAL_WIDTH/2.0f-50, 60.0f, 100, 133 };
-    Rectangle riverBottom = { VIRTUAL_WIDTH/2.0f-50, VIRTUAL_HEIGHT-60.0f-133, 100, 133 };
     
     std::vector<Rectangle> obstacles;
 
     for (auto& troop : troops) {
-        if (&troop ==this) {
+        if (&troop == this) {
             continue;
         }
         obstacles.push_back(troop.getHitbox());
     }
 
-    obstacles.push_back(riverMiddle);
-    obstacles.push_back(riverBottom);
-    obstacles.push_back(riverTop);
+    obstacles.push_back(RIVER_MIDDLE);
+    obstacles.push_back(RIVER_BOTTOM);
+    obstacles.push_back(RIVER_TOP);
 
     for (auto& obstacle : obstacles) {
         if (CheckCollisionRecs({hitbox.x+step, hitbox.y, hitbox.width, hitbox.height}, obstacle)) {
@@ -231,8 +231,9 @@ void Troop::update(float dt, std::vector<Troop>& troops) {
     }
     
     if (isAttacking) {
-        closestEnemy->takeDamage(attackDamage);
-    }  else if (isEnemyInRange) {
+        float actualDamage = attackDamage*dt;
+        closestEnemy->takeDamage(actualDamage);
+    }  else if (isEnemyInRange && !isRiverBetween(*closestEnemy)) {
         Vector2 directionToEnemy = { pos.x-closestEnemy->pos.x, pos.y-closestEnemy->pos.y };
 
         if (directionToEnemy.x < 0 && abs(directionToEnemy.x) > step && !blockedToRight) {
@@ -255,7 +256,6 @@ void Troop::update(float dt, std::vector<Troop>& troops) {
             } else if (not blockedAbove && distanceToBottomPath > step) {
                 pos.y -= step;
             }
-            
         } else {
             if (pos.y < TOPPATHY && not blockedBelow && distanceToTopPath > step) {
                 pos.y += step;
@@ -279,19 +279,32 @@ Rectangle Troop::getHitbox() const {
 
 void Troop::draw() {
     float healthBarWidth = 80.0f;
-    Rectangle healthbarRed = { pos.x - healthBarWidth/2.0f, pos.y-size*0.8f, healthBarWidth, 10.0f };
-    DrawRectangleRec(healthbarRed, RED);
+    Rectangle healthbarTop = { pos.x - healthBarWidth/2.0f, pos.y-size*0.8f, healthBarWidth, 10.0f };
+    DrawRectangleRec(healthbarTop, DARKGRAY);
 
     float healthRemainingPercent = health/maxHealth;
-    Rectangle healthBarGreen = { healthbarRed.x, healthbarRed.y, healthbarRed.width*healthRemainingPercent, healthbarRed.height };
-    DrawRectangleRec(healthBarGreen, GREEN);
+    Rectangle healthBarBelow = { healthbarTop.x, healthbarTop.y, healthbarTop.width*healthRemainingPercent, healthbarTop.height };
+    DrawRectangleRec(healthBarBelow, team);
 
+    if (health != maxHealth) {
+        DrawText(TextFormat("%.0f", health), healthBarBelow.x+2.0f, healthBarBelow.y+1.0f, 10.0f, BLACK);
+    }
+    
     float frameWidth = float(sprite.width) / numFrames;
-    Rectangle source = { currentFrame * frameWidth, 0.0f, frameWidth, float(sprite.height) };
+    float drawWidth = ColorIsEqual(team, RED) ? -frameWidth : frameWidth;
+    Rectangle source = { currentFrame * frameWidth, 0.0f, drawWidth, float(sprite.height) };
     Rectangle dest = { roundf(pos.x-size/2), roundf(pos.y-size/2), size, size };
     DrawTexturePro(sprite, source, dest, {0,0}, 0.0f, team);
 }
 
 float Troop::getDistanceToTroop(Troop otherTroop) const {
     return Vector2Distance(pos, otherTroop.pos);
+}
+
+bool Troop::isRiverBetween(Troop otherTroop) {
+    bool isTopRiverBetween = CheckCollisionLineRec(pos, otherTroop.getPosition(), RIVER_TOP);
+    bool isMiddleRiverBetween = CheckCollisionLineRec(pos, otherTroop.getPosition(), RIVER_MIDDLE);
+    bool isBottomRiverBetween = CheckCollisionLineRec(pos, otherTroop.getPosition(), RIVER_BOTTOM);
+
+    return isTopRiverBetween || isMiddleRiverBetween || isBottomRiverBetween;
 }
